@@ -1,0 +1,11 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  
+  color: "#f29620"
+  image: assets/images/courier logo.png
+  
+  android_12:
+    image: assets/images/courier logo.png
+    icon_background_color: "#f29620"
