@@ -8,6 +8,7 @@ import '../screens/home_screen.dart';
 import '../screens/orders_screen.dart';
 import '../screens/wallet_screen.dart';
 import '../screens/profile_screen.dart';
+import '../../business/pickups/screens/pickup_screen.dart';
 
 class MainLayout extends ConsumerWidget {
   const MainLayout({super.key});
@@ -19,7 +20,7 @@ class MainLayout extends ConsumerWidget {
 
     final screens = [
       const HomeScreen(),
-      const OrdersScreen(),
+      const PickupScreen(),
       const WalletScreen(),
       const ProfileScreen(),
     ];
@@ -209,18 +210,18 @@ class MainLayout extends ConsumerWidget {
           icon: Padding(
             padding: EdgeInsets.only(bottom: 4),
             child: Icon(
-              Icons.receipt_long_outlined,
+              Icons.local_shipping_outlined,
               size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
             ),
           ),
           activeIcon: Padding(
             padding: EdgeInsets.only(bottom: 4),
             child: Icon(
-              Icons.receipt_long,
+              Icons.local_shipping,
               size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
             ),
           ),
-          label: 'Orders',
+          label: 'Pickups',
         ),
         BottomNavigationBarItem(
           icon: Padding(
@@ -272,9 +273,9 @@ class MainLayout extends ConsumerWidget {
         index: 0,
       ),
       _NavItem(
-        icon: Icons.receipt_long_outlined,
-        activeIcon: Icons.receipt_long,
-        label: 'Orders',
+        icon: Icons.local_shipping_outlined,
+        activeIcon: Icons.local_shipping,
+        label: 'Pickups',
         index: 1,
       ),
       _NavItem(

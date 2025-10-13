@@ -124,6 +124,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
         ),
 
+        // Main Go Online/Offline Button (only show when no active orders)
+        if (activeOrders.isEmpty)
+          SliverToBoxAdapter(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.lg),
+                  child: _buildMainStatusButton(context, driverStatus, ref, textTheme, spacing),
+                ),
+              ),
+            ),
+          ),
+
         // Active Orders
         if (activeOrders.isNotEmpty)
           SliverToBoxAdapter(
@@ -176,8 +191,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             child: Column(
               children: [
                 _buildHeader(context, user, driverStatus, ref, textTheme, spacing),
+                SizedBox(height: spacing.lg),
+                // Main Go Online/Offline Button (only show when no active orders)
+                if (activeOrders.isEmpty)
+                  _buildMainStatusButton(context, driverStatus, ref, textTheme, spacing),
                 if (activeOrders.isNotEmpty) ...[
-                  SizedBox(height: spacing.lg),
                   ActiveOrderCard(order: activeOrders.first),
                 ],
               ],
@@ -231,8 +249,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             child: Column(
               children: [
                 _buildHeader(context, user, driverStatus, ref, textTheme, spacing),
+                SizedBox(height: spacing.xl),
+                // Main Go Online/Offline Button (only show when no active orders)
+                if (activeOrders.isEmpty)
+                  _buildMainStatusButton(context, driverStatus, ref, textTheme, spacing),
                 if (activeOrders.isNotEmpty) ...[
-                  SizedBox(height: spacing.xl),
                   ActiveOrderCard(order: activeOrders.first),
                 ],
               ],
@@ -881,6 +902,176 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMainStatusButton(
+    BuildContext context,
+    DriverStatus driverStatus,
+    WidgetRef ref,
+    TextTheme textTheme,
+    ResponsiveSpacing spacing,
+  ) {
+    final isOnline = driverStatus.isOnline;
+    
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          context.responsive<double>(
+            mobile: 20,
+            tablet: 24,
+            desktop: 28,
+          ),
+        ),
+        gradient: isOnline
+            ? LinearGradient(
+                colors: [
+                  AppTheme.mediumGray.withOpacity(0.8),
+                  AppTheme.mediumGray,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : LinearGradient(
+                colors: [
+                  AppTheme.primaryOrange,
+                  AppTheme.primaryOrange.withOpacity(0.8),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        boxShadow: [
+          BoxShadow(
+            color: (isOnline ? AppTheme.mediumGray : AppTheme.primaryOrange).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            ref.read(driverStatusProvider.notifier).toggleStatus();
+          },
+          borderRadius: BorderRadius.circular(
+            context.responsive<double>(
+              mobile: 20,
+              tablet: 24,
+              desktop: 28,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.responsive<double>(
+                mobile: 32,
+                tablet: 40,
+                desktop: 48,
+              ),
+              vertical: context.responsive<double>(
+                mobile: 24,
+                tablet: 28,
+                desktop: 32,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon
+                Container(
+                  width: context.responsive<double>(
+                    mobile: 80,
+                    tablet: 90,
+                    desktop: 100,
+                  ),
+                  height: context.responsive<double>(
+                    mobile: 80,
+                    tablet: 90,
+                    desktop: 100,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isOnline ? Icons.location_off : Icons.location_on,
+                    size: context.responsive<double>(
+                      mobile: 40,
+                      tablet: 45,
+                      desktop: 50,
+                    ),
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: spacing.md),
+                // Status indicator
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: context.responsive<double>(
+                        mobile: 12,
+                        tablet: 14,
+                        desktop: 16,
+                      ),
+                      height: context.responsive<double>(
+                        mobile: 12,
+                        tablet: 14,
+                        desktop: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isOnline ? Colors.white70 : Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: spacing.sm),
+                    Text(
+                      isOnline ? 'ONLINE' : 'OFFLINE',
+                      style: textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.sm),
+                // Main text
+                Text(
+                  isOnline ? 'Go Offline' : 'Go Online to Start Your Work',
+                  textAlign: TextAlign.center,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: context.responsive<double>(
+                      mobile: 20,
+                      tablet: 22,
+                      desktop: 24,
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacing.xs),
+                // Subtitle
+                Text(
+                  isOnline 
+                      ? 'Tap to pause receiving delivery orders'
+                      : 'Tap to start receiving delivery orders',
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: context.responsive<double>(
+                      mobile: 14,
+                      tablet: 15,
+                      desktop: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
