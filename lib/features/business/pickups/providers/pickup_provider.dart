@@ -40,10 +40,7 @@ class PickupNotifier extends StateNotifier<PickupState> {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
-      // Simulate API call - replace with actual API integration
-      await Future.delayed(const Duration(milliseconds: 1500));
-      
-      // Mock data for demonstration
+      // Load local mock data
       final mockAssignedPickups = _generateMockAssignedPickups();
       final mockCompletedPickups = _generateMockCompletedPickups();
       
@@ -74,9 +71,6 @@ class PickupNotifier extends StateNotifier<PickupState> {
       );
 
       _updatePickupInState(updatedPickup);
-      
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 500));
       
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -109,9 +103,6 @@ class PickupNotifier extends StateNotifier<PickupState> {
 
       _updatePickupInState(updatedPickup);
       
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 300));
-      
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
@@ -126,9 +117,6 @@ class PickupNotifier extends StateNotifier<PickupState> {
       final updatedPickup = pickup.copyWith(orders: updatedOrders);
 
       _updatePickupInState(updatedPickup);
-      
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 300));
       
     } catch (e) {
       state = state.copyWith(error: e.toString());

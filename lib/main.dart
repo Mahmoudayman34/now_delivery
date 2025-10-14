@@ -38,6 +38,15 @@ class MyApp extends ConsumerWidget {
           final onboardingState = ref.watch(onboardingProvider);
           final authState = ref.watch(authProvider);
           
+          // Show loading screen while checking auth status
+          if (authState.isLoading) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          
           // Show onboarding if user hasn't seen it yet
           if (!onboardingState.hasSeenOnboarding) {
             return const OnboardingScreen();
@@ -81,8 +90,14 @@ class _AutoGoOnlineWrapperState extends ConsumerState<AutoGoOnlineWrapper> {
     if (_hasAutoGoneOnline) return;
     _hasAutoGoneOnline = true;
     
-    // Automatically set driver status to online
-    await ref.read(driverStatusProvider.notifier).setOnline(true);
+    try {
+      // Automatically set driver status to online
+      // Wrapped in try-catch to prevent crashes if location services fail
+      await ref.read(driverStatusProvider.notifier).setOnline(true);
+    } catch (e) {
+      // Silently fail - user can manually go online later
+      debugPrint('Auto go online failed: $e');
+    }
   }
 
   @override

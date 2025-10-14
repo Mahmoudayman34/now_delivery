@@ -9,8 +9,8 @@ import java.util.Properties
 import java.io.FileInputStream
 
 android {
-    namespace = "com.example.now_delivery"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "co.nowshipping.nowcourier"
+    compileSdk = 35 // Required by plugins (backward compatible)
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -23,11 +23,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.now_delivery"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        applicationId = "co.nowshipping.nowcourier"
+        minSdk = 21 // Required for launcher icons and geolocator
+        targetSdk = 35 // Latest stable Android version
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true // Enable multidex for large apps
     }
 
     signingConfigs {
@@ -48,10 +49,23 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isShrinkResources = false
-            isMinifyEnabled = false
+            isShrinkResources = true
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            // Enable native debug symbols upload
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
+}
+
+dependencies {
+    // Multidex support for large apps
+    implementation("androidx.multidex:multidex:2.0.1")
 }
 
 flutter {

@@ -9,15 +9,14 @@ class ImageService {
   static final ImagePicker _picker = ImagePicker();
   
   /// Pick and save profile image
-  static Future<String?> pickAndCropProfileImage() async {
+  static Future<String?> pickAndCropProfileImage({ImageSource? source}) async {
     try {
-      // Show source selection
-      final ImageSource? source = await _showImageSourceDialog();
-      if (source == null) return null;
+      // Use provided source or default to gallery
+      final ImageSource imageSource = source ?? ImageSource.gallery;
       
       // Pick image with constraints for profile photo
       final XFile? pickedFile = await _picker.pickImage(
-        source: source,
+        source: imageSource,
         maxWidth: 512,
         maxHeight: 512,
         imageQuality: 85,
@@ -70,17 +69,13 @@ class ImageService {
     }
   }
   
-  /// Get image source selection (would normally show dialog)
-  static Future<ImageSource?> _showImageSourceDialog() async {
-    // For now, return camera by default
-    // In a real implementation, you'd show a dialog to choose between camera and gallery
-    return ImageSource.gallery;
+  /// Pick image from camera
+  static Future<String?> pickImageFromCamera() async {
+    return await pickAndCropProfileImage(source: ImageSource.camera);
   }
   
-  /// Show image source selection dialog
-  static Future<ImageSource?> showImageSourceDialog() async {
-    // This would typically be called from a widget to show a dialog
-    // For now, we'll just return gallery as default
-    return ImageSource.gallery;
+  /// Pick image from gallery
+  static Future<String?> pickImageFromGallery() async {
+    return await pickAndCropProfileImage(source: ImageSource.gallery);
   }
 }

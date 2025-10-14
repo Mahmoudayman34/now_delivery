@@ -52,27 +52,41 @@ class LocationService {
       return false;
     }
 
-    // Request background location permission for continuous tracking
-    final backgroundPermission = await Permission.locationAlways.request();
-    return backgroundPermission.isGranted || backgroundPermission.isLimited;
+    // Request background location permission for continuous tracking (optional)
+    // Don't fail if background permission is denied - foreground is sufficient
+    try {
+      await Permission.locationAlways.request();
+      // Return true even if background permission denied, as long as foreground works
+      return true;
+    } catch (e) {
+      // If background permission fails, still allow foreground tracking
+      return true;
+    }
   }
 
   /// Get current location once
   Future<Position?> getCurrentLocation() async {
     try {
       final hasPermission = await requestLocationPermission();
-      if (!hasPermission) return null;
+      if (!hasPermission) return _lastKnownPosition;
 
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          // Return last known position if timeout
+          if (_lastKnownPosition != null) return _lastKnownPosition!;
+          throw TimeoutException('Location request timed out');
+        },
       );
 
       _lastKnownPosition = position;
       return position;
     } catch (e) {
       print('Error getting current location: $e');
-      return null;
+      return _lastKnownPosition; // Return last known position on error
     }
   }
 

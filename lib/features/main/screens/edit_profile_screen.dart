@@ -66,7 +66,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         return;
       }
 
-      final String? imagePath = await ImageService.pickAndCropProfileImage();
+      // Pass the selected source to the image service
+      final String? imagePath = await ImageService.pickAndCropProfileImage(source: source);
       
       if (imagePath != null) {
         setState(() {
@@ -131,25 +132,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final shouldUpdate = await _showUpdateConfirmation();
     if (!shouldUpdate) return;
 
-    await ref.read(authProvider.notifier).updateProfile(
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-      avatar: _selectedImagePath,
-    );
+    try {
+      await ref.read(authProvider.notifier).updateProfile(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        avatar: _selectedImagePath,
+      );
 
-    if (mounted) {
-      final authState = ref.read(authProvider);
-      if (authState.hasError) {
+      if (mounted) {
+        // Show success dialog with updated information
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
         ErrorDialog.show(
           context,
           title: 'Update Failed',
-          message: authState.errorMessage ?? 'Failed to update profile',
+          message: 'Failed to update profile: ${e.toString()}',
           onRetry: _updateProfile,
         );
-      } else {
-        // Show success dialog with updated information
-        _showSuccessDialog();
       }
     }
   }

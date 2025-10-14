@@ -36,36 +36,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthState.loading();
 
     try {
-      // Hardcoded credentials validation
-      const String validEmail = 'mahmouddayman186@gmail.com';
-      const String validPassword = '12345678';
-      
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-      
-      // Check if provided credentials match the hardcoded ones
-      if (email.trim().toLowerCase() != validEmail.toLowerCase() || password != validPassword) {
-        state = const AuthState.error('Invalid email or password. Please check your credentials.');
+      // Local authentication - any non-empty credentials work
+      if (email.trim().isEmpty || password.trim().isEmpty) {
+        state = const AuthState.error('Please enter both email and password');
         return;
       }
       
-      // Successful login response for valid credentials
-      final mockUser = User(
-        id: '1',
-        email: validEmail,
-        name: 'Mahmoud Dayman',
-        phone: '+1234567890',
+      // Create user with provided email
+      final user = User(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        email: email.trim(),
+        name: email.split('@').first, // Use email prefix as name
+        phone: null,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
       
-      const mockToken = 'mock_jwt_token_12345';
+      const token = 'local_session_token';
 
-      // Store auth data
+      // Store auth data locally
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_tokenKey, mockToken);
-      await prefs.setString(_userKey, jsonEncode(mockUser.toJson()));
+      await prefs.setString(_tokenKey, token);
+      await prefs.setString(_userKey, jsonEncode(user.toJson()));
 
-      state = AuthState.authenticated(user: mockUser, token: mockToken);
+      state = AuthState.authenticated(user: user, token: token);
     } catch (e) {
       state = AuthState.error('Login failed: $e');
     }
@@ -75,26 +69,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthState.loading();
 
     try {
-      // TODO: Replace with actual API endpoint
-      await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
+      // Local registration - validate inputs
+      if (name.trim().isEmpty || email.trim().isEmpty || password.trim().isEmpty) {
+        state = const AuthState.error('Please fill in all fields');
+        return;
+      }
       
-      // Mock successful registration response
-      final mockUser = User(
-        id: '1',
-        email: email,
-        name: name,
+      // Create new user
+      final user = User(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        email: email.trim(),
+        name: name.trim(),
+        phone: null,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
       
-      const mockToken = 'mock_jwt_token_12345';
+      const token = 'local_session_token';
 
-      // Store auth data
+      // Store auth data locally
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_tokenKey, mockToken);
-      await prefs.setString(_userKey, jsonEncode(mockUser.toJson()));
+      await prefs.setString(_tokenKey, token);
+      await prefs.setString(_userKey, jsonEncode(user.toJson()));
 
-      state = AuthState.authenticated(user: mockUser, token: mockToken);
+      state = AuthState.authenticated(user: user, token: token);
     } catch (e) {
       state = AuthState.error('Registration failed: $e');
     }
@@ -118,9 +116,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthState.loading();
 
     try {
-      // TODO: Replace with actual API endpoint to delete user account
-      await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
-      
       // Clear all local data
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear(); // Clear all stored data for complete account deletion
@@ -137,15 +132,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String? phone,
     String? avatar,
   }) async {
-    if (state.user == null) return;
+    if (state.user == null || state.token == null) return;
+    
+    // Save current user and token before setting loading state
+    final currentUser = state.user!;
+    final currentToken = state.token!;
     
     state = const AuthState.loading();
 
     try {
-      // TODO: Replace with actual API endpoint
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-      
-      final updatedUser = state.user!.copyWith(
+      // Update user data locally
+      final updatedUser = currentUser.copyWith(
         name: name,
         email: email,
         phone: phone,
@@ -159,10 +156,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
       
       state = AuthState.authenticated(
         user: updatedUser,
-        token: state.token!,
+        token: currentToken,
       );
     } catch (e) {
-      state = AuthState.error('Profile update failed: $e');
+      // Restore previous state on error instead of showing error state
+      state = AuthState.authenticated(
+        user: currentUser,
+        token: currentToken,
+      );
+      // Re-throw so the UI can handle the error
+      rethrow;
     }
   }
 

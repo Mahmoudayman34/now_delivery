@@ -177,14 +177,11 @@ class OrdersNotifier extends StateNotifier<OrdersState> {
     state = state.copyWith(orders: orders);
   }
 
-  /// Refresh orders (simulate API call)
+  /// Refresh orders (load from local data)
   Future<void> refreshOrders() async {
     state = state.copyWith(isLoading: true);
     
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // In a real app, this would fetch from API
+    // Load local mock data
     _loadMockData();
   }
 }

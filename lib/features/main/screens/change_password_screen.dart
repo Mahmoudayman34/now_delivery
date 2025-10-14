@@ -41,8 +41,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     });
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      // Update password locally (no API call)
       
       if (mounted) {
         SuccessSnackBar.show(
