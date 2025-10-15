@@ -45,7 +45,15 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>UIStatusBarHidden</key>
-		<false/>
-	</dict>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Now Delivery needs access to your camera to take profile pictures and capture delivery documentation photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Now Delivery needs access to your photo library to select profile pictures and delivery documentation photos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Now Delivery needs permission to save photos to your photo library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Now Delivery needs access to your microphone for video capture if needed.</string>
+</dict>
 </plist>

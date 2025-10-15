@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:permission_handler/permission_handler.dart';
 
 class ImageService {
   static final ImagePicker _picker = ImagePicker();
@@ -14,26 +15,99 @@ class ImageService {
       // Use provided source or default to gallery
       final ImageSource imageSource = source ?? ImageSource.gallery;
       
+      // Check and request permissions before accessing camera/gallery
+      bool hasPermission = false;
+      if (imageSource == ImageSource.camera) {
+        hasPermission = await _checkCameraPermission();
+        if (!hasPermission) {
+          debugPrint('Camera permission denied');
+          return null;
+        }
+      } else {
+        hasPermission = await _checkPhotoLibraryPermission();
+        if (!hasPermission) {
+          debugPrint('Photo library permission denied');
+          return null;
+        }
+      }
+      
       // Pick image with constraints for profile photo
       final XFile? pickedFile = await _picker.pickImage(
         source: imageSource,
         maxWidth: 512,
         maxHeight: 512,
         imageQuality: 85,
+        preferredCameraDevice: CameraDevice.front, // Use front camera for profile pictures
       );
       
-      if (pickedFile == null) return null;
+      if (pickedFile == null) {
+        debugPrint('User cancelled image picking');
+        return null;
+      }
+      
+      // Verify file exists and is readable
+      final File sourceFile = File(pickedFile.path);
+      if (!await sourceFile.exists()) {
+        debugPrint('Picked file does not exist: ${pickedFile.path}');
+        return null;
+      }
       
       // Save to app directory
       final String savedPath = await _saveImageLocally(pickedFile.path);
       
-      // Clean up temporary file
-      await File(pickedFile.path).delete().catchError((_) => File(''));
+      // Clean up temporary file (only if it's different from saved path)
+      if (pickedFile.path != savedPath) {
+        try {
+          await sourceFile.delete();
+        } catch (e) {
+          debugPrint('Could not delete temporary file: $e');
+          // Non-critical error, continue
+        }
+      }
       
       return savedPath;
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('Error picking image: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
+    }
+  }
+  
+  /// Check camera permission
+  static Future<bool> _checkCameraPermission() async {
+    try {
+      if (Platform.isIOS) {
+        final status = await Permission.camera.status;
+        if (status.isDenied || status.isPermanentlyDenied) {
+          final result = await Permission.camera.request();
+          return result.isGranted;
+        }
+        return status.isGranted || status.isLimited;
+      }
+      // Android permissions are handled by image_picker plugin
+      return true;
+    } catch (e) {
+      debugPrint('Error checking camera permission: $e');
+      return false;
+    }
+  }
+  
+  /// Check photo library permission
+  static Future<bool> _checkPhotoLibraryPermission() async {
+    try {
+      if (Platform.isIOS) {
+        final status = await Permission.photos.status;
+        if (status.isDenied || status.isPermanentlyDenied) {
+          final result = await Permission.photos.request();
+          return result.isGranted || result.isLimited;
+        }
+        return status.isGranted || status.isLimited;
+      }
+      // Android permissions are handled by image_picker plugin
+      return true;
+    } catch (e) {
+      debugPrint('Error checking photo library permission: $e');
+      return false;
     }
   }
   

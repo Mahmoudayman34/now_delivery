@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../theme/app_theme.dart';
 import '../../../core/services/image_service.dart';
@@ -73,12 +74,38 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         setState(() {
           _selectedImagePath = imagePath;
         });
+      } else {
+        // Image picking was cancelled or failed
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                source == ImageSource.camera
+                    ? 'Camera access was denied or cancelled. Please grant camera permission in Settings.'
+                    : 'Photo library access was denied or cancelled. Please grant photo access in Settings.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                label: 'Settings',
+                textColor: Colors.white,
+                onPressed: () async {
+                  // This will be imported from permission_handler
+                  await openAppSettings();
+                },
+              ),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        ErrorSnackBar.show(
-          context,
-          message: 'Failed to pick image: ${e.toString()}',
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {

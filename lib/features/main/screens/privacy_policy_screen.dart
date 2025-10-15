@@ -60,19 +60,51 @@ class PrivacyPolicyScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               
+              // B2B Notice
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryOrange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.business_center, color: AppTheme.primaryOrange, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'This privacy policy applies to our B2B (Business-to-Business) logistics platform for business users.',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppTheme.darkGray,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
               _buildSection(
                 'Information We Collect',
-                'We collect information you provide directly to us, such as when you create an account, place an order, or contact us for support. This may include your name, email address, phone number, delivery address, and payment information.',
+                'We collect information you provide directly to us when you register your business account, manage delivery orders, or contact us for support. This may include:\n\n• Business name and contact information\n• Representative name, email address, and phone number\n• Business delivery addresses and locations\n• Order and delivery tracking information\n• Profile pictures (stored locally on your device)\n\nNote: All payment and subscription information is collected and processed through our website (nowshipping.co), not through this mobile application.',
               ),
               
               _buildSection(
                 'How We Use Your Information',
-                'We use the information we collect to:\n\n• Process and fulfill your orders\n• Communicate with you about your orders and account\n• Provide customer support\n• Improve our services\n• Send you promotional communications (with your consent)\n• Comply with legal obligations',
+                'We use the information we collect to:\n\n• Process and manage your delivery orders\n• Communicate with you about your orders and business account\n• Provide customer support and technical assistance\n• Improve our logistics platform and services\n• Send you business updates and service notifications\n• Comply with legal and regulatory obligations\n• Validate your subscription tier and feature access',
+              ),
+              
+              _buildSection(
+                'Payment Information',
+                'IMPORTANT: This mobile application does NOT process any payments or collect payment information.\n\nAll subscription payments and billing are handled exclusively through our website at nowshipping.co. Your payment details are processed by secure third-party payment processors on our website and are never transmitted through or stored in this mobile application.\n\nThis app only validates your subscription status via secure API calls to determine which features you can access.',
               ),
               
               _buildSection(
                 'Information Sharing',
-                'We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy. We may share your information with:\n\n• Delivery partners to fulfill your orders\n• Payment processors to handle transactions\n• Service providers who assist in our operations\n• Law enforcement when required by law',
+                'We do not sell, trade, or otherwise transfer your business information to third parties without your consent, except as described in this policy. We may share your information with:\n\n• Courier partners to fulfill delivery orders\n• Cloud service providers for data hosting (AWS, Google Cloud)\n• Analytics providers to improve our services\n• Service providers who assist in our operations\n• Law enforcement when required by law\n\nNote: Payment processing is handled by our website payment processors, not through this app.',
               ),
               
               _buildSection(
@@ -82,12 +114,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
               
               _buildSection(
                 'Location Information',
-                'We collect location information to provide delivery services. You can disable location services through your device settings, but this may affect app functionality.',
+                'We collect and use location information to:\n\n• Display delivery locations on maps\n• Calculate delivery routes and distances\n• Provide real-time order tracking\n• Validate delivery addresses\n\nLocation services are essential for the core functionality of this logistics platform. You can disable location permissions through your device settings, but this will significantly limit app functionality.\n\nLocation data is transmitted via secure HTTPS connections and is only used for delivery management purposes.',
+              ),
+              
+              _buildSection(
+                'Camera and Photo Library Access',
+                'The app requests camera and photo library permissions to allow you to:\n\n• Take or upload a profile picture\n• Capture delivery documentation (if applicable)\n\nYou can deny these permissions and still use the app\'s core delivery management features. Profile pictures are stored locally on your device and optionally synced to our servers if you choose to upload them.\n\nWe will always request permission before accessing your camera or photo library, as required by iOS guidelines.',
               ),
               
               _buildSection(
                 'Cookies and Tracking',
-                'We use cookies and similar technologies to enhance your experience, analyze usage, and provide personalized content. You can manage cookie preferences in your browser settings.',
+                'This mobile application uses minimal tracking:\n\n• Session authentication tokens (JWT)\n• User preferences stored locally\n• Anonymous usage analytics (optional)\n\nWe do not use third-party advertising trackers or sell your data to advertisers. Analytics data is used solely to improve our service quality and user experience.',
               ),
               
               _buildSection(
@@ -116,8 +153,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
               ),
               
               _buildSection(
+                'Business User Data',
+                'As a B2B application, the data we collect is primarily business-related information for logistics operations. Personal data of individual users (names, emails, phone numbers) is collected only as necessary to identify business representatives and provide account access.\n\nIf you are using this app on behalf of a business, you confirm that you have the authority to provide business information and agree to these terms on behalf of your organization.',
+              ),
+              
+              _buildSection(
                 'Contact Us',
-                'If you have any questions about this privacy policy or our data practices, please contact us at:\n\nEmail: privacy@nowdelivery.com\nPhone: +1 (555) 123-4567\nAddress: 123 Delivery Street, City, State 12345',
+                'If you have any questions about this privacy policy or our data practices, please contact us at:\n\nWebsite: https://nowshipping.co\nEmail: support@nowshipping.co\nPrivacy Email: privacy@nowshipping.co\n\nFor subscription or billing questions, please visit our website as all payment matters are handled there.',
               ),
               
               const SizedBox(height: 32),

@@ -60,24 +60,68 @@ class TermsOfServiceScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               
+              // B2B Notice
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryOrange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.business_center, color: AppTheme.primaryOrange, size: 20),
+                        const SizedBox(width: 12),
+                        Text(
+                          'B2B Service Agreement',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: AppTheme.darkGray,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'These terms apply to business users of our logistics management platform. This is NOT a consumer delivery app.',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: AppTheme.darkGray,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
               _buildSection(
                 'Acceptance of Terms',
-                'By accessing and using Now Delivery ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.',
+                'By accessing and using Now Delivery / Now Shipping ("the Service"), you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by these terms, please do not use this service.\n\nThis agreement is between you (or the business entity you represent) and Now Shipping.',
               ),
               
               _buildSection(
                 'Description of Service',
-                'Now Delivery is a food and goods delivery platform that connects customers with local restaurants and stores. We facilitate orders and coordinate delivery through our network of delivery partners.',
+                'Now Delivery is a B2B (Business-to-Business) logistics and delivery management platform designed exclusively for business users. We provide:\n\n• Order management and tracking tools\n• Delivery scheduling and coordination\n• Pickup request management\n• Financial tracking and reporting\n• Integration with courier networks\n• Multi-user business account access\n\nThis is NOT a consumer-facing delivery app. It is a business tool for managing logistics operations.',
               ),
               
               _buildSection(
-                'User Accounts',
-                'To use our Service, you must:\n\n• Be at least 18 years old or have parental consent\n• Provide accurate and complete registration information\n• Maintain the security of your account credentials\n• Accept responsibility for all activities under your account\n• Notify us immediately of any unauthorized use',
+                'Business User Accounts',
+                'To use our Service, you must:\n\n• Represent a legitimate business entity\n• Be at least 18 years old and authorized to bind the business\n• Register and pay for a subscription through our website (nowshipping.co)\n• Provide accurate business and contact information\n• Maintain the security of your account credentials\n• Accept responsibility for all activities under your account\n• Notify us immediately of any unauthorized use\n\nBusiness accounts may have multiple users depending on subscription tier.',
               ),
               
               _buildSection(
-                'Orders and Payments',
-                'When you place an order:\n\n• You are making an offer to purchase items at the listed prices\n• Orders are subject to acceptance by the merchant\n• Prices include applicable taxes and fees\n• Payment is processed when the order is confirmed\n• You are responsible for providing accurate delivery information',
+                'Subscriptions and Payments',
+                'IMPORTANT - NO IN-APP PURCHASES:\n\nThis mobile application does NOT process any payments or subscriptions. All subscription management occurs through our website at https://nowshipping.co.\n\n• Subscriptions must be purchased on our website\n• Payment is processed by our website payment processors\n• The mobile app validates your subscription status via API\n• Features are enabled/disabled based on your subscription tier\n• Billing inquiries must be directed to our website support\n\nSubscription Tiers:\n• Free Trial: Limited features for evaluation\n• Basic: For small businesses\n• Professional: For growing businesses\n• Enterprise: For large organizations\n\nThis app is exempt from Apple\'s In-App Purchase requirements under the B2B exemption (App Store Review Guideline 3.1.3(b)).',
+              ),
+              
+              _buildSection(
+                'Order Management',
+                'When you create delivery orders through the app:\n\n• You are responsible for accurate delivery information\n• Order details are transmitted to courier partners\n• You must comply with shipping regulations\n• Prohibited items cannot be shipped\n• You are liable for the contents of shipments',
               ),
               
               _buildSection(
@@ -86,8 +130,8 @@ class TermsOfServiceScreen extends StatelessWidget {
               ),
               
               _buildSection(
-                'Cancellations and Refunds',
-                'Order modifications and cancellations:\n\n• Orders may be cancelled within 5 minutes of placement\n• Refunds are processed according to our refund policy\n• We reserve the right to cancel orders in certain circumstances\n• Partial refunds may apply for partially fulfilled orders',
+                'Service Cancellations and Refunds',
+                'Subscription Cancellations:\n• Subscription changes must be made through our website\n• Cancellations follow the terms agreed upon at purchase\n• No refunds are processed through this mobile app\n• Contact our website support for billing issues\n\nOrder Cancellations:\n• Delivery orders may be cancelled per courier policies\n• Cancellation rules depend on order status\n• Contact courier partner for order-specific issues',
               ),
               
               _buildSection(
@@ -126,8 +170,13 @@ class TermsOfServiceScreen extends StatelessWidget {
               ),
               
               _buildSection(
+                'Mobile App Specific Terms',
+                'This mobile application:\n\n• Does NOT process payments or collect payment information\n• Requires camera permission for profile pictures (optional)\n• Requires location permission for delivery tracking (recommended)\n• Stores data locally and syncs with our servers\n• May send push notifications about deliveries\n• Requires internet connection for most features\n\nYou can manage app permissions in your device settings.',
+              ),
+              
+              _buildSection(
                 'Contact Information',
-                'For questions about these terms, contact us at:\n\nEmail: legal@nowdelivery.com\nPhone: +1 (555) 123-4567\nAddress: 123 Delivery Street, San Francisco, CA 94105',
+                'For questions about these terms, contact us at:\n\nWebsite: https://nowshipping.co\nEmail: support@nowshipping.co\nLegal: legal@nowshipping.co\n\nFor subscription and billing: Visit our website\nFor technical support: support@nowshipping.co',
               ),
               
               const SizedBox(height: 32),

@@ -71,7 +71,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Version 1.0.0',
+                    'Version 1.0.5 (Build 6)',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: AppTheme.mediumGray,
@@ -79,7 +79,17 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Fast, reliable delivery service at your fingertips. Order from your favorite restaurants and stores with just a few taps.',
+                    'Business-to-Business Logistics Platform',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryOrange,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Now Delivery is a comprehensive shipping and delivery management solution for businesses. Manage orders, track deliveries, schedule pickups, and monitor your logistics operations all in one place.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 14,
@@ -92,28 +102,84 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
+            // Business Model Notice
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryOrange.withOpacity(0.1),
+                    AppTheme.primaryOrange.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.business_center,
+                        color: AppTheme.primaryOrange,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Business Application',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.darkGray,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'This is a B2B (Business-to-Business) application designed exclusively for business users managing delivery and logistics operations.',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: AppTheme.darkGray,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildInfoRow(Icons.web, 'Subscriptions managed at nowshipping.co'),
+                  const SizedBox(height: 8),
+                  _buildInfoRow(Icons.block, 'No in-app purchases or payments'),
+                  const SizedBox(height: 8),
+                  _buildInfoRow(Icons.devices, 'Multi-platform enterprise system'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
 
             // Contact Section
             _InfoSection(
               title: 'Contact Information',
               children: [
                 _InfoTile(
-                  icon: Icons.email_outlined,
-                  title: 'Email',
-                  subtitle: 'info@nowdelivery.com',
-                  onTap: () => _launchEmail('info@nowdelivery.com'),
+                  icon: Icons.language,
+                  title: 'Website',
+                  subtitle: 'nowshipping.co',
+                  onTap: () => _launchURL('https://nowshipping.co'),
                 ),
                 _InfoTile(
-                  icon: Icons.phone_outlined,
-                  title: 'Phone',
-                  subtitle: '+1 (555) 123-4567',
-                  onTap: () => _launchPhone('+15551234567'),
+                  icon: Icons.email_outlined,
+                  title: 'Email',
+                  subtitle: 'support@nowshipping.co',
+                  onTap: () => _launchEmail('support@nowshipping.co'),
                 ),
                 _InfoTile(
                   icon: Icons.support_agent_outlined,
-                  title: 'Support',
-                  subtitle: 'support@nowdelivery.com',
-                  onTap: () => _launchEmail('support@nowdelivery.com'),
+                  title: 'Customer Support',
+                  subtitle: 'Get help with your account',
+                  onTap: () => _launchEmail('support@nowshipping.co'),
                 ),
               ],
             ),
@@ -185,7 +251,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '© 2024 Now Delivery Inc. All rights reserved.',
+                    '© 2024 Now Shipping. All rights reserved.',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: AppTheme.mediumGray,
@@ -197,6 +263,24 @@ class AboutScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppTheme.primaryOrange),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: AppTheme.darkGray,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -217,15 +301,6 @@ class AboutScreen extends StatelessWidget {
       await launchUrl(emailUri);
     }
   }
-
-  void _launchPhone(String phone) async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: phone);
-    
-    if (await canLaunchUrl(phoneUri)) {
-      await launchUrl(phoneUri);
-    }
-  }
-
 
   void _showLicensesDialog(BuildContext context) {
     showDialog(
