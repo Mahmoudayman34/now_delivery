@@ -98,13 +98,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
               ),
               
               _buildSection(
-                'Payment Information',
-                'IMPORTANT: This mobile application does NOT process any payments or collect payment information.\n\nAll subscription payments and billing are handled exclusively through our website at nowshipping.co. Your payment details are processed by secure third-party payment processors on our website and are never transmitted through or stored in this mobile application.\n\nThis app only validates your subscription status via secure API calls to determine which features you can access.',
-              ),
-              
-              _buildSection(
                 'Information Sharing',
-                'We do not sell, trade, or otherwise transfer your business information to third parties without your consent, except as described in this policy. We may share your information with:\n\n• Courier partners to fulfill delivery orders\n• Cloud service providers for data hosting (AWS, Google Cloud)\n• Analytics providers to improve our services\n• Service providers who assist in our operations\n• Law enforcement when required by law\n\nNote: Payment processing is handled by our website payment processors, not through this app.',
+                'We do not sell, trade, or otherwise transfer your business information to third parties without your consent, except as described in this policy. We may share your information with:\n\n• Courier partners to fulfill delivery orders\n• Cloud service providers for data hosting (AWS, Google Cloud)\n• Analytics providers to improve our services\n• Service providers who assist in our operations\n• Law enforcement when required by law',
               ),
               
               _buildSection(

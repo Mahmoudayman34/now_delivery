@@ -111,12 +111,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               
               _buildSection(
                 'Business User Accounts',
-                'To use our Service, you must:\n\n• Represent a legitimate business entity\n• Be at least 18 years old and authorized to bind the business\n• Register and pay for a subscription through our website (nowshipping.co)\n• Provide accurate business and contact information\n• Maintain the security of your account credentials\n• Accept responsibility for all activities under your account\n• Notify us immediately of any unauthorized use\n\nBusiness accounts may have multiple users depending on subscription tier.',
-              ),
-              
-              _buildSection(
-                'Subscriptions and Payments',
-                'IMPORTANT - NO IN-APP PURCHASES:\n\nThis mobile application does NOT process any payments or subscriptions. All subscription management occurs through our website at https://nowshipping.co.\n\n• Subscriptions must be purchased on our website\n• Payment is processed by our website payment processors\n• The mobile app validates your subscription status via API\n• Features are enabled/disabled based on your subscription tier\n• Billing inquiries must be directed to our website support\n\nSubscription Tiers:\n• Free Trial: Limited features for evaluation\n• Basic: For small businesses\n• Professional: For growing businesses\n• Enterprise: For large organizations\n\nThis app is exempt from Apple\'s In-App Purchase requirements under the B2B exemption (App Store Review Guideline 3.1.3(b)).',
+                'To use our Service, you must:\n\n• Represent a legitimate business entity\n• Be at least 18 years old and authorized to bind the business\n• Register through our website (nowshipping.co)\n• Provide accurate business and contact information\n• Maintain the security of your account credentials\n• Accept responsibility for all activities under your account\n• Notify us immediately of any unauthorized use\n\nBusiness accounts may have multiple users depending on your account type.',
               ),
               
               _buildSection(
@@ -130,8 +125,8 @@ class TermsOfServiceScreen extends StatelessWidget {
               ),
               
               _buildSection(
-                'Service Cancellations and Refunds',
-                'Subscription Cancellations:\n• Subscription changes must be made through our website\n• Cancellations follow the terms agreed upon at purchase\n• No refunds are processed through this mobile app\n• Contact our website support for billing issues\n\nOrder Cancellations:\n• Delivery orders may be cancelled per courier policies\n• Cancellation rules depend on order status\n• Contact courier partner for order-specific issues',
+                'Cancellations',
+                'Order Cancellations:\n• Delivery orders may be cancelled per courier policies\n• Cancellation rules depend on order status\n• Contact courier partner for order-specific issues\n• You are responsible for any cancellation fees',
               ),
               
               _buildSection(
@@ -171,7 +166,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               
               _buildSection(
                 'Mobile App Specific Terms',
-                'This mobile application:\n\n• Does NOT process payments or collect payment information\n• Requires camera permission for profile pictures (optional)\n• Requires location permission for delivery tracking (recommended)\n• Stores data locally and syncs with our servers\n• May send push notifications about deliveries\n• Requires internet connection for most features\n\nYou can manage app permissions in your device settings.',
+                'This mobile application:\n\n• Requires camera permission for profile pictures (optional)\n• Requires location permission for delivery tracking (recommended)\n• Stores data locally and syncs with our servers\n• May send push notifications about deliveries\n• Requires internet connection for most features\n\nYou can manage app permissions in your device settings.',
               ),
               
               _buildSection(
