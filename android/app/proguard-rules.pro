@@ -38,6 +38,17 @@
 ## Path provider
 -keep class io.flutter.plugins.pathprovider.** { *; }
 
+## Mobile Scanner and ML Kit for barcode scanning
+-keep class com.google.mlkit.vision.barcode.** { *; }
+-keep class com.google.android.gms.vision.** { *; }
+-keep class dev.steenbakker.mobile_scanner.** { *; }
+-dontwarn com.google.mlkit.vision.barcode.**
+-dontwarn com.google.android.gms.vision.**
+
+# For CameraX
+-keep class androidx.camera.** { *; }
+-dontwarn androidx.camera.**
+
 ## Keep native methods
 -keepclasseswithmembernames class * {
     native <methods>;

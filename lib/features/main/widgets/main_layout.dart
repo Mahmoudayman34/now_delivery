@@ -5,8 +5,7 @@ import '../../../theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
 import '../providers/navigation_provider.dart';
 import '../screens/home_screen.dart';
-import '../screens/orders_screen.dart';
-import '../screens/wallet_screen.dart';
+// Wallet tab removed to avoid any payment-related UI during review
 import '../screens/profile_screen.dart';
 import '../../business/pickups/screens/pickup_screen.dart';
 
@@ -21,7 +20,6 @@ class MainLayout extends ConsumerWidget {
     final screens = [
       const HomeScreen(),
       const PickupScreen(),
-      const WalletScreen(),
       const ProfileScreen(),
     ];
 
@@ -227,23 +225,6 @@ class MainLayout extends ConsumerWidget {
           icon: Padding(
             padding: EdgeInsets.only(bottom: 4),
             child: Icon(
-              Icons.account_balance_wallet_outlined,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
-            ),
-          ),
-          activeIcon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
-              Icons.account_balance_wallet,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
-            ),
-          ),
-          label: 'Wallet',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
               Icons.person_outline,
               size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
             ),
@@ -279,16 +260,10 @@ class MainLayout extends ConsumerWidget {
         index: 1,
       ),
       _NavItem(
-        icon: Icons.account_balance_wallet_outlined,
-        activeIcon: Icons.account_balance_wallet,
-        label: 'Wallet',
-        index: 2,
-      ),
-      _NavItem(
         icon: Icons.person_outline,
         activeIcon: Icons.person,
         label: 'Profile',
-        index: 3,
+        index: 2,
       ),
     ];
 

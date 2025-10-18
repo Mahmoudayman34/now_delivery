@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../theme/app_theme.dart';
-import 'terms_of_service_screen.dart';
 import 'privacy_policy_screen.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -102,63 +101,6 @@ class AboutScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Business Model Notice
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primaryOrange.withOpacity(0.1),
-                    AppTheme.primaryOrange.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.business_center,
-                        color: AppTheme.primaryOrange,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Business Application',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.darkGray,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'This is a B2B (Business-to-Business) application designed exclusively for business users managing delivery and logistics operations.',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppTheme.darkGray,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(Icons.web, 'Subscriptions managed at nowshipping.co'),
-                  const SizedBox(height: 8),
-                  _buildInfoRow(Icons.block, 'No in-app purchases or payments'),
-                  const SizedBox(height: 8),
-                  _buildInfoRow(Icons.devices, 'Multi-platform enterprise system'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
             // Contact Section
             _InfoSection(
               title: 'Contact Information',
@@ -191,18 +133,6 @@ class AboutScreen extends StatelessWidget {
               title: 'Legal',
               children: [
                 _InfoTile(
-                  icon: Icons.description_outlined,
-                  title: 'Terms of Service',
-                  subtitle: 'View our terms and conditions',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const TermsOfServiceScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _InfoTile(
                   icon: Icons.privacy_tip_outlined,
                   title: 'Privacy Policy',
                   subtitle: 'How we protect your data',
@@ -214,73 +144,11 @@ class AboutScreen extends StatelessWidget {
                     );
                   },
                 ),
-                _InfoTile(
-                  icon: Icons.gavel_outlined,
-                  title: 'Licenses',
-                  subtitle: 'Open source licenses',
-                  onTap: () => _showLicensesDialog(context),
-                ),
               ],
-            ),
-            const SizedBox(height: 24),
-
-            // Credits Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Made with ❤️ by the Now Delivery Team',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.darkGray,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '© 2024 Now Shipping. All rights reserved.',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: AppTheme.mediumGray,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppTheme.primaryOrange),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppTheme.darkGray,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -300,52 +168,6 @@ class AboutScreen extends StatelessWidget {
     if (await canLaunchUrl(emailUri)) {
       await launchUrl(emailUri);
     }
-  }
-
-  void _showLicensesDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Open Source Licenses',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.darkGray,
-          ),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            'This app uses the following open source packages:\n\n'
-            '• Flutter - Google Inc.\n'
-            '• flutter_riverpod - Remi Rousselet\n'
-            '• google_fonts - Google Inc.\n'
-            '• shared_preferences - Flutter Team\n'
-            '• url_launcher - Flutter Team\n'
-            '• And many more...\n\n'
-            'Full license information can be found in the app settings.',
-            style: GoogleFonts.inter(
-              color: AppTheme.mediumGray,
-              height: 1.5,
-            ),
-          ),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryOrange,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: Text(
-              'OK',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

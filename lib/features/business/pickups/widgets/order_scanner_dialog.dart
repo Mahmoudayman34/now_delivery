@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class OrderScannerDialog extends StatefulWidget {
   final Function(String) onOrderScanned;
@@ -16,6 +17,14 @@ class OrderScannerDialog extends StatefulWidget {
 class _OrderScannerDialogState extends State<OrderScannerDialog> {
   bool _isScanning = false;
   String? _scannedCode;
+  MobileScannerController? _scannerController;
+  bool _isCameraReady = false;
+
+  @override
+  void dispose() {
+    _scannerController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +268,7 @@ class _OrderScannerDialogState extends State<OrderScannerDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Enhanced Camera View
+          // Real Camera View with Scanner
           Container(
             height: 300,
             decoration: BoxDecoration(
@@ -273,110 +282,142 @@ class _OrderScannerDialogState extends State<OrderScannerDialog> {
                 ),
               ],
             ),
-            child: Stack(
-              children: [
-                // Enhanced camera simulation
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.grey[800]!,
-                        Colors.grey[900]!,
-                        Colors.black,
-                      ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(
+                children: [
+                  // Real camera view
+                  if (_scannerController != null && _isCameraReady)
+                    MobileScanner(
+                      controller: _scannerController!,
+                      onDetect: (capture) {
+                        final List<Barcode> barcodes = capture.barcodes;
+                        if (barcodes.isNotEmpty && _scannedCode == null) {
+                          final barcode = barcodes.first;
+                          if (barcode.rawValue != null) {
+                            _handleScannedCode(barcode.rawValue!);
+                          }
+                        }
+                      },
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt_rounded,
-                          color: Colors.white.withOpacity(0.7),
-                          size: 48,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Camera View\n(Simulated)',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Enhanced scanning frame
-                Center(
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.blue[400]!,
-                        width: 3,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Stack(
-                      children: [
-                        // Corner indicators
-                        ...List.generate(4, (index) {
-                          return Positioned(
-                            top: index < 2 ? 8 : null,
-                            bottom: index >= 2 ? 8 : null,
-                            left: index % 2 == 0 ? 8 : null,
-                            right: index % 2 == 1 ? 8 : null,
-                            child: Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.blue[400]!,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
+                  // Loading indicator while camera initializes
+                  if (_scannerController != null && !_isCameraReady)
+                    Container(
+                      color: Colors.black,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              color: Colors.blue[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Starting camera...',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
                               ),
                             ),
-                          );
-                        }),
-                        Center(
-                          child: Text(
-                            'Position barcode here',
-                            style: TextStyle(
-                              color: Colors.blue[300],
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                // Enhanced scanning animation
-                Positioned.fill(
-                  child: Center(
-                    child: SizedBox(
+                  // Scanning frame overlay
+                  Center(
+                    child: Container(
                       width: 200,
                       height: 200,
-                      child: const _ScanningAnimation(),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _scannedCode != null 
+                              ? Colors.green[400]! 
+                              : Colors.blue[400]!,
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Stack(
+                        children: [
+                          // Corner indicators
+                          ...List.generate(4, (index) {
+                            return Positioned(
+                              top: index < 2 ? 8 : null,
+                              bottom: index >= 2 ? 8 : null,
+                              left: index % 2 == 0 ? 8 : null,
+                              right: index % 2 == 1 ? 8 : null,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: _scannedCode != null 
+                                        ? Colors.green[400]! 
+                                        : Colors.blue[400]!,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            );
+                          }),
+                          if (_scannedCode == null)
+                            Center(
+                              child: Text(
+                                'Position barcode here',
+                                style: TextStyle(
+                                  color: Colors.blue[300],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  // Scanning animation (only when no code scanned)
+                  if (_scannedCode == null)
+                    Positioned.fill(
+                      child: Center(
+                        child: SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: const _ScanningAnimation(),
+                        ),
+                      ),
+                    ),
+                  // Torch button
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.flash_auto,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => _scannerController?.toggleTorch(),
+                        tooltip: 'Toggle Flashlight',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
-          // Enhanced action buttons
+          // Action buttons
           Row(
             children: [
               Expanded(
@@ -399,14 +440,14 @@ class _OrderScannerDialogState extends State<OrderScannerDialog> {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.orange[400]!, Colors.orange[600]!],
+                      colors: [Colors.blue[400]!, Colors.blue[600]!],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.orange.withOpacity(0.3),
+                        color: Colors.blue.withOpacity(0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -415,7 +456,7 @@ class _OrderScannerDialogState extends State<OrderScannerDialog> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: _simulateScan,
+                      onTap: () => _scannerController?.start(),
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -429,7 +470,7 @@ class _OrderScannerDialogState extends State<OrderScannerDialog> {
                             ),
                             SizedBox(width: 8),
                             Text(
-                              'Simulate Scan',
+                              'Scanning...',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -509,43 +550,79 @@ class _OrderScannerDialogState extends State<OrderScannerDialog> {
   }
 
   void _startScanning() async {
-    // For now, simulate camera permission check
-    // In a real app, you would check camera permission here
-    
-    setState(() {
-      _isScanning = true;
-      _scannedCode = null;
-    });
-    
-    // Show a simulated permission message
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Camera permission granted - Scanning ready'),
-          backgroundColor: Colors.green[600],
-          duration: const Duration(seconds: 2),
-        ),
+    try {
+      setState(() {
+        _isScanning = true;
+        _scannedCode = null;
+        _isCameraReady = false;
+      });
+      
+      // Initialize the scanner controller
+      _scannerController = MobileScannerController(
+        detectionSpeed: DetectionSpeed.normal,
+        facing: CameraFacing.back,
+        torchEnabled: false,
       );
+      
+      // Start the scanner
+      await _scannerController!.start();
+      
+      // Mark camera as ready
+      if (mounted) {
+        setState(() {
+          _isCameraReady = true;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Camera ready - Point at barcode to scan'),
+            backgroundColor: Colors.green[600],
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle camera permission or initialization errors
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Camera error: ${e.toString()}'),
+            backgroundColor: Colors.red[600],
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        // Reset state
+        _scannerController?.dispose();
+        _scannerController = null;
+        setState(() {
+          _isScanning = false;
+          _isCameraReady = false;
+        });
+      }
     }
   }
 
   void _stopScanning() {
+    _scannerController?.stop();
+    _scannerController?.dispose();
+    _scannerController = null;
+    
     setState(() {
       _isScanning = false;
       _scannedCode = null;
+      _isCameraReady = false;
     });
   }
 
-  void _simulateScan() {
-    // Simulate scanning a barcode
-    final mockCodes = ['ORD123', 'ORD456', 'ORD789', 'ORD101', 'ORD202'];
-    final randomCode = mockCodes[DateTime.now().millisecond % mockCodes.length];
-    
+  void _handleScannedCode(String code) {
     // Add haptic feedback
-    HapticFeedback.lightImpact();
+    HapticFeedback.mediumImpact();
+    
+    // Stop scanning to prevent multiple scans
+    _scannerController?.stop();
     
     setState(() {
-      _scannedCode = randomCode;
+      _scannedCode = code;
     });
     
     // Auto-close after a short delay if user doesn't interact

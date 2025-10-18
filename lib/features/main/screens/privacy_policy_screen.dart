@@ -50,57 +50,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   color: AppTheme.darkGray,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Last updated: ${DateTime.now().toString().split(' ')[0]}',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: AppTheme.mediumGray,
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              // B2B Notice
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.business_center, color: AppTheme.primaryOrange, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This privacy policy applies to our B2B (Business-to-Business) logistics platform for business users.',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: AppTheme.darkGray,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 24),
               
               _buildSection(
                 'Information We Collect',
-                'We collect information you provide directly to us when you register your business account, manage delivery orders, or contact us for support. This may include:\n\n• Business name and contact information\n• Representative name, email address, and phone number\n• Business delivery addresses and locations\n• Order and delivery tracking information\n• Profile pictures (stored locally on your device)\n\nNote: All payment and subscription information is collected and processed through our website (nowshipping.co), not through this mobile application.',
+                'We collect information you provide directly to us when you register your business account, manage delivery orders, or contact us for support. This may include:\n\n• Business name and contact information\n• Representative name, email address, and phone number\n• Business delivery addresses and locations\n• Order and delivery tracking information\n• Profile pictures (stored locally on your device)',
               ),
               
-              _buildSection(
-                'How We Use Your Information',
-                'We use the information we collect to:\n\n• Process and manage your delivery orders\n• Communicate with you about your orders and business account\n• Provide customer support and technical assistance\n• Improve our logistics platform and services\n• Send you business updates and service notifications\n• Comply with legal and regulatory obligations\n• Validate your subscription tier and feature access',
-              ),
-              
-              _buildSection(
-                'Information Sharing',
-                'We do not sell, trade, or otherwise transfer your business information to third parties without your consent, except as described in this policy. We may share your information with:\n\n• Courier partners to fulfill delivery orders\n• Cloud service providers for data hosting (AWS, Google Cloud)\n• Analytics providers to improve our services\n• Service providers who assist in our operations\n• Law enforcement when required by law',
-              ),
               
               _buildSection(
                 'Data Security',
@@ -123,74 +79,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
               ),
               
               _buildSection(
-                'Your Rights',
-                'You have the right to:\n\n• Access your personal information\n• Correct inaccurate information\n• Delete your account and data\n• Opt out of promotional communications\n• Request data portability\n• Withdraw consent where applicable',
-              ),
-              
-              _buildSection(
                 'Data Retention',
                 'We retain your personal information for as long as necessary to provide our services and comply with legal obligations. You can request deletion of your account and data at any time.',
               ),
               
-              _buildSection(
-                'Children\'s Privacy',
-                'Our services are not intended for children under 13. We do not knowingly collect personal information from children under 13. If you become aware that a child has provided us with personal information, please contact us.',
-              ),
+            
               
-              _buildSection(
-                'International Data Transfers',
-                'Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place to protect your information.',
-              ),
-              
-              _buildSection(
-                'Changes to This Policy',
-                'We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.',
-              ),
-              
-              _buildSection(
-                'Business User Data',
-                'As a B2B application, the data we collect is primarily business-related information for logistics operations. Personal data of individual users (names, emails, phone numbers) is collected only as necessary to identify business representatives and provide account access.\n\nIf you are using this app on behalf of a business, you confirm that you have the authority to provide business information and agree to these terms on behalf of your organization.',
-              ),
-              
-              _buildSection(
-                'Contact Us',
-                'If you have any questions about this privacy policy or our data practices, please contact us at:\n\nWebsite: https://nowshipping.co\nEmail: support@nowshipping.co\nPrivacy Email: privacy@nowshipping.co\n\nFor subscription or billing questions, please visit our website as all payment matters are handled there.',
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Consent Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Data Processing Consent',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.darkGray,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'By using Now Delivery, you consent to the collection and processing of your personal information as described in this privacy policy.',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: AppTheme.darkGray,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

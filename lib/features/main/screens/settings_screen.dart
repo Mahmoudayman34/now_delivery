@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../theme/app_theme.dart';
 import 'change_password_screen.dart';
@@ -15,6 +18,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _pushNotifications = true;
   bool _emailNotifications = false;
   bool _locationServices = true;
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+    _checkLocationPermission();
+  }
+
+  Future<void> _loadPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _pushNotifications = prefs.getBool('settings_push_notifications') ?? true;
+      _emailNotifications = prefs.getBool('settings_email_notifications') ?? false;
+      _locationServices = prefs.getBool('settings_location_services') ?? true;
+    });
+  }
+
+  Future<void> _savePreference(String key, bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  Future<void> _checkLocationPermission() async {
+    final LocationPermission permission = await Geolocator.checkPermission();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    
+    setState(() {
+      _locationServices = serviceEnabled && 
+                         (permission == LocationPermission.always || 
+                          permission == LocationPermission.whileInUse);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() {
                         _pushNotifications = value;
                       });
+                      _savePreference('settings_push_notifications', value);
                     },
                     activeColor: AppTheme.primaryOrange,
                   ),
@@ -65,6 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() {
                         _emailNotifications = value;
                       });
+                      _savePreference('settings_email_notifications', value);
                     },
                     activeColor: AppTheme.primaryOrange,
                   ),
@@ -83,10 +120,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: 'Allow app to access your location',
                   trailing: Switch(
                     value: _locationServices,
-                    onChanged: (value) {
-                      setState(() {
-                        _locationServices = value;
-                      });
+                    onChanged: (value) async {
+                      if (value) {
+                        // User wants to enable location - request permission
+                        await _requestLocationPermission();
+                      } else {
+                        // User wants to disable - show dialog to open settings
+                        await _showOpenSettingsDialog();
+                      }
                     },
                     activeColor: AppTheme.primaryOrange,
                   ),
@@ -121,6 +162,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _requestLocationPermission() async {
+    final LocationPermission permission = await Geolocator.checkPermission();
+    
+    if (permission == LocationPermission.denied) {
+      final LocationPermission requestResult = await Geolocator.requestPermission();
+      
+      if (requestResult == LocationPermission.whileInUse || 
+          requestResult == LocationPermission.always) {
+        setState(() {
+          _locationServices = true;
+        });
+        await _savePreference('settings_location_services', true);
+      } else {
+        setState(() {
+          _locationServices = false;
+        });
+      }
+    } else if (permission == LocationPermission.deniedForever) {
+      // Permission denied forever - show dialog to open settings
+      await _showOpenSettingsDialog();
+    } else {
+      // Already has permission
+      setState(() {
+        _locationServices = true;
+      });
+      await _savePreference('settings_location_services', true);
+    }
+  }
+
+  Future<void> _showOpenSettingsDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Location Permission',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.darkGray,
+          ),
+        ),
+        content: Text(
+          'To change location permissions, please open the app settings and enable location access.',
+          style: GoogleFonts.inter(color: AppTheme.mediumGray),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(
+                color: AppTheme.mediumGray,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryOrange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(
+              'Open Settings',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await openAppSettings();
+      // Recheck permission after returning from settings
+      await Future.delayed(const Duration(milliseconds: 500));
+      await _checkLocationPermission();
+    }
   }
 
 }

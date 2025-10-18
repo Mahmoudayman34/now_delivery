@@ -48,7 +48,7 @@
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Now Delivery needs access to your camera to take profile pictures and capture delivery documentation photos.</string>
+	<string>Now Delivery needs access to your camera to scan barcodes, take profile pictures and capture delivery documentation photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Now Delivery needs access to your photo library to select profile pictures and delivery documentation photos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

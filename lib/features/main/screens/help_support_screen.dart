@@ -33,12 +33,7 @@ class HelpSupportScreen extends StatelessWidget {
             _SupportSection(
               title: 'Get in Touch',
               children: [
-                _SupportTile(
-                  icon: Icons.chat_outlined,
-                  title: 'Live Chat',
-                  subtitle: 'Chat with our support team',
-                  onTap: () => _showComingSoonDialog(context, 'Live Chat'),
-                ),
+               
                 _SupportTile(
                   icon: Icons.email_outlined,
                   title: 'Email Support',
@@ -59,61 +54,7 @@ class HelpSupportScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
 
-            // FAQ Section
-            _SupportSection(
-              title: 'Frequently Asked Questions',
-              children: [
-                _ExpandableFAQ(
-                  question: 'How do I track my order?',
-                  answer: 'You can track your order in real-time from the Orders tab. You\'ll receive notifications about your order status updates.',
-                ),
-                _ExpandableFAQ(
-                  question: 'What are the delivery fees?',
-                  answer: 'Delivery fees vary based on distance and order size. You can see the exact fee before confirming your order.',
-                ),
-                _ExpandableFAQ(
-                  question: 'How can I cancel an order?',
-                  answer: 'You can cancel an order within 5 minutes of placing it. Go to Orders > Active Orders and tap Cancel.',
-                ),
-                _ExpandableFAQ(
-                  question: 'What payment methods do you accept?',
-                  answer: 'We accept credit cards, debit cards, PayPal, and cash on delivery in selected areas.',
-                ),
-                _ExpandableFAQ(
-                  question: 'How do I report an issue with my order?',
-                  answer: 'You can report issues through the Orders tab by selecting your order and tapping "Report Issue", or contact our support team.',
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Quick Actions
-            _SupportSection(
-              title: 'Quick Actions',
-              children: [
-                _SupportTile(
-                  icon: Icons.report_outlined,
-                  title: 'Report a Problem',
-                  subtitle: 'Having issues with the app?',
-                  onTap: () => _showReportDialog(context),
-                ),
-                _SupportTile(
-                  icon: Icons.feedback_outlined,
-                  title: 'Send Feedback',
-                  subtitle: 'Help us improve the app',
-                  onTap: () => _showFeedbackDialog(context),
-                ),
-                _SupportTile(
-                  icon: Icons.star_outline,
-                  title: 'Rate Our App',
-                  subtitle: 'Share your experience',
-                  onTap: () => _showRatingDialog(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
 
             // App Version
             Container(

@@ -380,7 +380,6 @@ class ProfileScreen extends ConsumerWidget {
             Text(
               '• Permanently delete all your data\n'
               '• Cancel any active orders\n'
-              '• Remove your payment methods\n'
               '• Delete your order history\n'
               '• Deactivate your account immediately',
               style: GoogleFonts.inter(
