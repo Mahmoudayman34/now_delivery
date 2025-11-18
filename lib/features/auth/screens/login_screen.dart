@@ -7,6 +7,8 @@ import '../providers/auth_provider.dart';
 import '../models/auth_state.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/loading_button.dart';
+import '../services/auth_api_service.dart';
+import '../../main/providers/navigation_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
+  bool _isApiLoading = false;
 
   // Animation controllers
   late AnimationController _fadeController;
@@ -144,12 +147,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      ref.read(authProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+      setState(() => _isApiLoading = true);
+      final success = await AuthService.loginCourier(
+        context,
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      setState(() => _isApiLoading = false);
+      if (success) {
+        debugPrint('Courier login successful — reloading auth state...');
+        // Reload auth state to update profile and dashboard with user data
+        await ref.read(authProvider.notifier).reloadAuthState();
+        // Reset navigation to home/dashboard (index 0)
+        ref.read(navigationProvider.notifier).setIndex(0);
+        debugPrint('Auth state reloaded successfully - navigating to dashboard');
+      } else {
+        debugPrint('Courier login failed.');
+      }
     }
   }
 
@@ -558,8 +574,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
               // Login Button
               LoadingButton(
-                onPressed: _handleLogin,
-                isLoading: authState.isLoading,
+                onPressed: _isApiLoading ? null : _handleLogin,
+                isLoading: _isApiLoading,
                 text: 'Sign In',
               ),
             ],

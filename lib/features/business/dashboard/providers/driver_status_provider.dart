@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/location_service.dart';
 
@@ -11,7 +12,12 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
   DriverStatusNotifier(this._ref) : super(const DriverStatus());
 
   /// Toggle driver online/offline status
-  Future<void> toggleStatus() async {
+  /// [showDialogCallback] is an optional callback that shows a dialog before requesting permission
+  /// [context] is required for showing background location disclosure dialog
+  Future<void> toggleStatus({
+    Future<bool> Function()? showDialogCallback,
+    BuildContext? context,
+  }) async {
     final locationService = _ref.read(locationServiceProvider);
     
     if (state.isOnline) {
@@ -20,7 +26,10 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
       state = state.copyWith(isOnline: false);
     } else {
       // Going online - start location tracking
-      final success = await locationService.startLocationTracking();
+      final success = await locationService.startLocationTracking(
+        showDialogCallback: showDialogCallback,
+        context: context,
+      );
       if (success) {
         state = state.copyWith(isOnline: true);
       } else {
@@ -34,13 +43,22 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
   }
 
   /// Set online status directly
-  Future<void> setOnline(bool isOnline) async {
+  /// [showDialogCallback] is an optional callback that shows a dialog before requesting permission
+  /// [context] is required for showing background location disclosure dialog
+  Future<void> setOnline(
+    bool isOnline, {
+    Future<bool> Function()? showDialogCallback,
+    BuildContext? context,
+  }) async {
     if (state.isOnline == isOnline) return;
     
     final locationService = _ref.read(locationServiceProvider);
     
     if (isOnline) {
-      final success = await locationService.startLocationTracking();
+      final success = await locationService.startLocationTracking(
+        showDialogCallback: showDialogCallback,
+        context: context,
+      );
       if (success) {
         state = state.copyWith(isOnline: true, errorMessage: null);
       } else {

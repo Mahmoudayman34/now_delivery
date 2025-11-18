@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/location_permission_dialog.dart';
 
 final locationServiceProvider = Provider<LocationService>((ref) {
   return LocationService();
@@ -30,7 +32,13 @@ class LocationService {
   bool get isTracking => _isTracking;
 
   /// Check and request location permissions
-  Future<bool> requestLocationPermission() async {
+  /// [showDialogCallback] is an optional callback that shows a dialog before requesting permission
+  /// [context] is required for showing background location disclosure dialog
+  /// Should return true if user accepts, false if they decline
+  Future<bool> requestLocationPermission({
+    Future<bool> Function()? showDialogCallback,
+    BuildContext? context,
+  }) async {
     // Check if location services are enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -41,6 +49,14 @@ class LocationService {
     LocationPermission permission = await Geolocator.checkPermission();
     
     if (permission == LocationPermission.denied) {
+      // Show dialog before requesting permission if callback is provided
+      if (showDialogCallback != null) {
+        final userAccepted = await showDialogCallback();
+        if (!userAccepted) {
+          return false;
+        }
+      }
+      
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         return false;
@@ -52,22 +68,44 @@ class LocationService {
       return false;
     }
 
-    // Request background location permission for continuous tracking (optional)
-    // Don't fail if background permission is denied - foreground is sufficient
-    try {
-      await Permission.locationAlways.request();
-      // Return true even if background permission denied, as long as foreground works
-      return true;
-    } catch (e) {
-      // If background permission fails, still allow foreground tracking
-      return true;
+    // Request background location permission ONLY after showing prominent disclosure
+    // This is required by Google Play Store policy
+    if (permission == LocationPermission.whileInUse) {
+      // User has foreground permission, now request background permission with disclosure
+      if (context != null && context.mounted) {
+        // Show prominent disclosure dialog before requesting background location
+        final userConsented = await showBackgroundLocationDisclosureDialog(context);
+        if (!userConsented) {
+          // User denied background location, but we can still use foreground permission
+          return true; // Return true because foreground permission is sufficient
+        }
+      }
+      
+      // Only request background location if user consented
+      try {
+        await Permission.locationAlways.request();
+        // Return true even if background permission denied, as long as foreground works
+        return true;
+      } catch (e) {
+        // If background permission fails, still allow foreground tracking
+        return true;
+      }
     }
+
+    // Already has "always" permission (includes background)
+    return true;
   }
 
   /// Get current location once
-  Future<Position?> getCurrentLocation() async {
+  Future<Position?> getCurrentLocation({
+    Future<bool> Function()? showDialogCallback,
+    BuildContext? context,
+  }) async {
     try {
-      final hasPermission = await requestLocationPermission();
+      final hasPermission = await requestLocationPermission(
+        showDialogCallback: showDialogCallback,
+        context: context,
+      );
       if (!hasPermission) return _lastKnownPosition;
 
       final position = await Geolocator.getCurrentPosition(
@@ -91,11 +129,19 @@ class LocationService {
   }
 
   /// Start continuous location tracking
-  Future<bool> startLocationTracking() async {
+  /// [showDialogCallback] is an optional callback that shows a dialog before requesting permission
+  /// [context] is required for showing background location disclosure dialog
+  Future<bool> startLocationTracking({
+    Future<bool> Function()? showDialogCallback,
+    BuildContext? context,
+  }) async {
     if (_isTracking) return true;
 
     try {
-      final hasPermission = await requestLocationPermission();
+      final hasPermission = await requestLocationPermission(
+        showDialogCallback: showDialogCallback,
+        context: context,
+      );
       if (!hasPermission) return false;
 
       const LocationSettings locationSettings = LocationSettings(

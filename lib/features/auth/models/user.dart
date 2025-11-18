@@ -24,8 +24,9 @@ class User {
       name: json['name'] as String,
       phone: json['phone'] as String?,
       avatar: json['avatar'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      // Handle both snake_case and camelCase for date fields
+      createdAt: DateTime.parse(json['createdAt'] ?? json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] ?? json['updated_at'] as String),
     );
   }
 

@@ -21,48 +21,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final token = prefs.getString(_tokenKey);
       final userData = prefs.getString(_userKey);
 
+      print('🔍 Checking auth status...');
+      print('📝 Token found: ${token != null}');
+      print('👤 User data found: ${userData != null}');
+      
+      if (token != null) {
+        print('🔑 Token: $token');
+      }
+      if (userData != null) {
+        print('📄 User data: $userData');
+      }
+
       if (token != null && userData != null) {
         final user = User.fromJson(jsonDecode(userData));
+        print('✅ User authenticated: ${user.name} (${user.email})');
         state = AuthState.authenticated(user: user, token: token);
       } else {
+        print('❌ User not authenticated - redirecting to login');
         state = const AuthState.unauthenticated();
       }
     } catch (e) {
+      print('❌ Error checking auth status: $e');
       state = AuthState.error('Failed to check authentication status: $e');
     }
   }
 
   Future<void> login(String email, String password) async {
-    state = const AuthState.loading();
-
-    try {
-      // Local authentication - any non-empty credentials work
-      if (email.trim().isEmpty || password.trim().isEmpty) {
-        state = const AuthState.error('Please enter both email and password');
-        return;
-      }
-      
-      // Create user with provided email
-      final user = User(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        email: email.trim(),
-        name: email.split('@').first, // Use email prefix as name
-        phone: null,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      
-      const token = 'local_session_token';
-
-      // Store auth data locally
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_tokenKey, token);
-      await prefs.setString(_userKey, jsonEncode(user.toJson()));
-
-      state = AuthState.authenticated(user: user, token: token);
-    } catch (e) {
-      state = AuthState.error('Login failed: $e');
-    }
+    // DEPRECATED: Simulated login. Use AuthService.loginCourier for production login.
+    state = const AuthState.error('Use AuthService.loginCourier for login.');
   }
 
   Future<void> register(String name, String email, String password) async {
@@ -99,15 +85,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    // Set loading state so the UI can react if needed
     state = const AuthState.loading();
 
     try {
+      print('🔓 Starting logout...');
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_tokenKey);
-      await prefs.remove(_userKey);
 
+      // Remove AuthNotifier keys
+      final removedToken = await prefs.remove(_tokenKey);
+      final removedUser = await prefs.remove(_userKey);
+  print('🧹 Removed auth_token: $removedToken, user_data: $removedUser');
+
+      // Remove legacy AuthService keys for complete logout (backwards compatibility)
+      final removedLegacyToken = await prefs.remove('token');
+      final removedLegacyRole = await prefs.remove('userRole');
+      final removedLegacyEmail = await prefs.remove('userEmail');
+      final removedLegacyName = await prefs.remove('userName');
+  print('🧹 Removed legacy keys: token=$removedLegacyToken, userRole=$removedLegacyRole, userEmail=$removedLegacyEmail, userName=$removedLegacyName');
+
+      // Completed - mark as unauthenticated
       state = const AuthState.unauthenticated();
+      print('✅ Logout completed and state set to unauthenticated');
     } catch (e) {
+      print('❌ Logout error: $e');
       state = AuthState.error('Logout failed: $e');
     }
   }
@@ -167,6 +168,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Re-throw so the UI can handle the error
       rethrow;
     }
+  }
+
+  /// Reload authentication state from SharedPreferences
+  /// Call this after external login (e.g., AuthService.loginCourier)
+  Future<void> reloadAuthState() async {
+    await _checkAuthStatus();
   }
 
   void clearError() {

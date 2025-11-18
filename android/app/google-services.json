@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "159796710781",
+    "project_id": "now-courier-a67ad",
+    "storage_bucket": "now-courier-a67ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159796710781:android:0ddbb3253ab06842841014",
+        "android_client_info": {
+          "package_name": "co.nowshipping.nowcourier"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9BIRr-6EWq1q93QTCKFCClLeBazZW8gc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

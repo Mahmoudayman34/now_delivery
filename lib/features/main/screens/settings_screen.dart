@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../theme/app_theme.dart';
-import 'change_password_screen.dart';
+import '../../../core/utils/location_permission_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,8 +15,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _pushNotifications = true;
-  bool _emailNotifications = false;
   bool _locationServices = true;
   @override
   void initState() {
@@ -28,8 +26,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _pushNotifications = prefs.getBool('settings_push_notifications') ?? true;
-      _emailNotifications = prefs.getBool('settings_email_notifications') ?? false;
       _locationServices = prefs.getBool('settings_location_services') ?? true;
     });
   }
@@ -72,44 +68,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            // Notifications Section
-            _SettingsSection(
-              title: 'Notifications',
-              children: [
-                _SettingsTile(
-                  icon: Icons.notifications_outlined,
-                  title: 'Push Notifications',
-                  subtitle: 'Receive order updates and promotions',
-                  trailing: Switch(
-                    value: _pushNotifications,
-                    onChanged: (value) {
-                      setState(() {
-                        _pushNotifications = value;
-                      });
-                      _savePreference('settings_push_notifications', value);
-                    },
-                    activeColor: AppTheme.primaryOrange,
-                  ),
-                ),
-                _SettingsTile(
-                  icon: Icons.email_outlined,
-                  title: 'Email Notifications',
-                  subtitle: 'Get updates via email',
-                  trailing: Switch(
-                    value: _emailNotifications,
-                    onChanged: (value) {
-                      setState(() {
-                        _emailNotifications = value;
-                      });
-                      _savePreference('settings_email_notifications', value);
-                    },
-                    activeColor: AppTheme.primaryOrange,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
             // App Preferences Section
             _SettingsSection(
               title: 'App Preferences',
@@ -134,30 +92,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // Account Section
-            _SettingsSection(
-              title: 'Account',
-              children: [
-                _SettingsTile(
-                  icon: Icons.security_outlined,
-                  title: 'Change Password',
-                  subtitle: 'Update your account password',
-                  trailing: const Icon(
-                    Icons.chevron_right,
-                    color: AppTheme.mediumGray,
-                  ),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ChangePasswordScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -168,6 +102,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final LocationPermission permission = await Geolocator.checkPermission();
     
     if (permission == LocationPermission.denied) {
+      // Show dialog before requesting permission
+      final userAccepted = await showLocationPermissionDialog(context);
+      if (!userAccepted) {
+        setState(() {
+          _locationServices = false;
+        });
+        return;
+      }
+      
       final LocationPermission requestResult = await Geolocator.requestPermission();
       
       if (requestResult == LocationPermission.whileInUse || 

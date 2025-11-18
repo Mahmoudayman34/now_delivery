@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/app_theme.dart';
+import 'custom_notifications.dart';
 
 class LoadingOverlay extends StatelessWidget {
   final bool isLoading;
@@ -172,36 +173,15 @@ class SuccessSnackBar {
   static void show(
     BuildContext context, {
     required String message,
+    String? title,
     Duration duration = const Duration(seconds: 3),
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.check_circle,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                message,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        duration: duration,
-      ),
+    // Use new custom notification system
+    CustomNotification.showSuccess(
+      context,
+      message: message,
+      title: title,
+      duration: duration,
     );
   }
 }
@@ -210,36 +190,51 @@ class ErrorSnackBar {
   static void show(
     BuildContext context, {
     required String message,
+    String? title,
+    Duration duration = const Duration(seconds: 4),
+    VoidCallback? onRetry,
+  }) {
+    // Use new custom notification system
+    CustomNotification.showError(
+      context,
+      message: message,
+      title: title,
+      duration: duration,
+      onRetry: onRetry,
+    );
+  }
+}
+
+class InfoSnackBar {
+  static void show(
+    BuildContext context, {
+    required String message,
+    String? title,
     Duration duration = const Duration(seconds: 4),
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.error,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                message,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        duration: duration,
-      ),
+    // Use new custom notification system
+    CustomNotification.showInfo(
+      context,
+      message: message,
+      title: title,
+      duration: duration,
+    );
+  }
+}
+
+class WarningSnackBar {
+  static void show(
+    BuildContext context, {
+    required String message,
+    String? title,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    // Use new custom notification system
+    CustomNotification.showWarning(
+      context,
+      message: message,
+      title: title,
+      duration: duration,
     );
   }
 }

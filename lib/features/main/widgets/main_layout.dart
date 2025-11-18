@@ -7,7 +7,8 @@ import '../providers/navigation_provider.dart';
 import '../screens/home_screen.dart';
 // Wallet tab removed to avoid any payment-related UI during review
 import '../screens/profile_screen.dart';
-import '../../business/pickups/screens/pickup_screen.dart';
+import '../screens/shop_screen.dart';
+import '../../business/shipments/screens/shipments_screen.dart';
 
 class MainLayout extends ConsumerWidget {
   const MainLayout({super.key});
@@ -19,7 +20,8 @@ class MainLayout extends ConsumerWidget {
 
     final screens = [
       const HomeScreen(),
-      const PickupScreen(),
+      const ShipmentsScreen(),
+      const ShopScreen(),
       const ProfileScreen(),
     ];
 
@@ -166,79 +168,82 @@ class MainLayout extends ConsumerWidget {
   }
 
   Widget _buildBottomNavigation(BuildContext context, WidgetRef ref, int currentIndex) {
-    final textTheme = AppTheme.getResponsiveTextTheme(context);
-    
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: (index) {
-        ref.read(navigationProvider.notifier).setIndex(index);
-      },
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: AppTheme.primaryOrange,
-      unselectedItemColor: AppTheme.mediumGray,
-      selectedLabelStyle: textTheme.labelSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: AppTheme.primaryOrange,
+    final iconSize = Responsive.iconSize(
+      context,
+      mobile: 24,
+      tablet: 26,
+      desktop: 28,
+    );
+
+    return SizedBox(
+      height: context.responsive<double>(
+        mobile: 64,
+        tablet: 70,
+        desktop: 76,
       ),
-      unselectedLabelStyle: textTheme.labelSmall?.copyWith(
-        fontWeight: FontWeight.w500,
-        color: AppTheme.mediumGray,
-      ),
-      elevation: 0,
-      items: [
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
+      child: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          ref.read(navigationProvider.notifier).setIndex(index);
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        selectedItemColor: AppTheme.primaryOrange,
+        unselectedItemColor: AppTheme.mediumGray,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(
               Icons.home_outlined,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
+              size: iconSize,
             ),
-          ),
-          activeIcon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
+            activeIcon: Icon(
               Icons.home,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
+              size: iconSize,
+              color: AppTheme.primaryOrange,
             ),
+            label: 'Home',
           ),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
+          BottomNavigationBarItem(
+            icon: Icon(
               Icons.local_shipping_outlined,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
+              size: iconSize,
             ),
-          ),
-          activeIcon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
+            activeIcon: Icon(
               Icons.local_shipping,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
+              size: iconSize,
+              color: AppTheme.primaryOrange,
             ),
+            label: 'Shipments',
           ),
-          label: 'Pickups',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.store_outlined,
+              size: iconSize,
+            ),
+            activeIcon: Icon(
+              Icons.store,
+              size: iconSize,
+              color: AppTheme.primaryOrange,
+            ),
+            label: 'Shop',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
               Icons.person_outline,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
+              size: iconSize,
             ),
-          ),
-          activeIcon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(
+            activeIcon: Icon(
               Icons.person,
-              size: Responsive.iconSize(context, mobile: 24, tablet: 26, desktop: 28),
+              size: iconSize,
+              color: AppTheme.primaryOrange,
             ),
+            label: 'Profile',
           ),
-          label: 'Profile',
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -256,14 +261,20 @@ class MainLayout extends ConsumerWidget {
       _NavItem(
         icon: Icons.local_shipping_outlined,
         activeIcon: Icons.local_shipping,
-        label: 'Pickups',
+        label: 'Shipments',
         index: 1,
+      ),
+      _NavItem(
+        icon: Icons.store_outlined,
+        activeIcon: Icons.store,
+        label: 'Shop',
+        index: 2,
       ),
       _NavItem(
         icon: Icons.person_outline,
         activeIcon: Icons.person,
         label: 'Profile',
-        index: 2,
+        index: 3,
       ),
     ];
 

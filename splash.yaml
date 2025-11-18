@@ -2,10 +2,18 @@ flutter_native_splash:
   android: true
   ios: true
   web: false
-  
+
+  # Background color (required)
   color: "#f29620"
-  image: assets/images/courier logo.png
-  
+
+  # Splash screen image (recommended transparent PNG)
+  image: assets/images/courier_logo_final.png
+
+
+  # Android 12+ configuration (API 31+)
   android_12:
-    image: assets/images/courier logo.png
+    image: assets/images/curior_And12.png
     icon_background_color: "#f29620"
+
+  # Fullscreen mode
+  fullscreen: true

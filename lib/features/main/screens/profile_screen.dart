@@ -7,10 +7,9 @@ import '../../../theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../shared/widgets/loading_overlay.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'edit_profile_screen.dart';
+import '../../main/providers/navigation_provider.dart';
 import 'settings_screen.dart';
 import 'help_support_screen.dart';
-import 'privacy_policy_screen.dart';
 import 'about_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -61,6 +60,8 @@ class ProfileScreen extends ConsumerWidget {
       child: Column(
         children: [
           _buildProfileCard(context, user, textTheme, spacing),
+          SizedBox(height: spacing.lg),
+          _buildPerformanceStats(context, textTheme, spacing),
           SizedBox(height: spacing.xl),
           _buildMenuOptions(context, ref, textTheme, spacing),
           SizedBox(height: 100), // Extra padding for bottom navigation
@@ -81,7 +82,13 @@ class ProfileScreen extends ConsumerWidget {
           flex: 1,
           child: SingleChildScrollView(
             padding: EdgeInsets.all(spacing.lg),
-            child: _buildProfileCard(context, user, textTheme, spacing),
+            child: Column(
+              children: [
+                _buildProfileCard(context, user, textTheme, spacing),
+                SizedBox(height: spacing.lg),
+                _buildPerformanceStats(context, textTheme, spacing),
+              ],
+            ),
           ),
         ),
         
@@ -118,7 +125,13 @@ class ProfileScreen extends ConsumerWidget {
               flex: 1,
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(spacing.xl),
-                child: _buildProfileCard(context, user, textTheme, spacing),
+                child: Column(
+                  children: [
+                    _buildProfileCard(context, user, textTheme, spacing),
+                    SizedBox(height: spacing.lg),
+                    _buildPerformanceStats(context, textTheme, spacing),
+                  ],
+                ),
               ),
             ),
             
@@ -178,37 +191,37 @@ class ProfileScreen extends ConsumerWidget {
               tablet: 90,
               desktop: 100,
             ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryOrange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(
-                        color: AppTheme.primaryOrange.withOpacity(0.3),
-                        width: 2,
-                      ),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryOrange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(40),
+              border: Border.all(
+                color: AppTheme.primaryOrange.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: user?.avatar != null && user!.avatar!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(38),
+                    child: Image.file(
+                      File(user.avatar!),
+                      width: 76,
+                      height: 76,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.person,
+                          size: 40,
+                          color: AppTheme.primaryOrange,
+                        );
+                      },
                     ),
-                    child: user?.avatar != null && user!.avatar!.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(38),
-                            child: Image.file(
-                              File(user.avatar!),
-                              width: 76,
-                              height: 76,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: AppTheme.primaryOrange,
-                                );
-                              },
-                            ),
-                          )
-                        : Icon(
-                            Icons.person,
-                            size: 40,
-                            color: AppTheme.primaryOrange,
-                          ),
+                  )
+                : Icon(
+                    Icons.person,
+                    size: 40,
+                    color: AppTheme.primaryOrange,
                   ),
+          ),
           SizedBox(height: spacing.md),
           Text(
             user?.name ?? 'User Name',
@@ -224,32 +237,151 @@ class ProfileScreen extends ConsumerWidget {
               color: AppTheme.mediumGray,
             ),
           ),
-          SizedBox(height: spacing.md),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const EditProfileScreen(),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryOrange,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.lg,
-                vertical: spacing.sm,
-              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceStats(
+    BuildContext context,
+    TextTheme textTheme,
+    ResponsiveSpacing spacing,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(spacing.lg),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFFFF8F0),
+            const Color(0xFFFFEFDB),
+          ],
+        ),
+        borderRadius: Responsive.borderRadius(
+          context,
+          mobile: 16,
+          tablet: 18,
+          desktop: 20,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Performance Stats',
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.darkGray,
             ),
-            child: Text(
-              'Edit Profile',
-              style: textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+          ),
+          SizedBox(height: spacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStatItem(
+                context: context,
+                icon: Icons.local_shipping_outlined,
+                value: '245',
+                label: 'Deliveries',
+                iconColor: AppTheme.primaryOrange,
+                textTheme: textTheme,
+                spacing: spacing,
               ),
+              _buildStatItem(
+                context: context,
+                icon: Icons.trending_up,
+                value: '98%',
+                label: 'On Time',
+                iconColor: Colors.green,
+                textTheme: textTheme,
+                spacing: spacing,
+              ),
+              _buildStatItem(
+                context: context,
+                icon: Icons.star,
+                value: '4.8',
+                label: 'Rating',
+                iconColor: Colors.amber,
+                textTheme: textTheme,
+                spacing: spacing,
+                showStar: true,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required BuildContext context,
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color iconColor,
+    required TextTheme textTheme,
+    required ResponsiveSpacing spacing,
+    bool showStar = false,
+  }) {
+    return Expanded(
+      child: Column(
+        children: [
+          if (showStar)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 20,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  value,
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.darkGray,
+                  ),
+                ),
+              ],
+            )
+          else
+            Column(
+              children: [
+                Icon(
+                  icon,
+                  color: iconColor,
+                  size: context.responsive<double>(
+                    mobile: 28,
+                    tablet: 32,
+                    desktop: 36,
+                  ),
+                ),
+                SizedBox(height: spacing.xs),
+                Text(
+                  value,
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.darkGray,
+                  ),
+                ),
+              ],
+            ),
+          SizedBox(height: spacing.xs),
+          Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppTheme.mediumGray,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -265,87 +397,207 @@ class ProfileScreen extends ConsumerWidget {
   ) {
     return Column(
       children: [
-        _MenuOption(
-          icon: Icons.settings,
-          title: 'Settings',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
+        // Settings - Simple row
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.sm,
+                vertical: spacing.md,
               ),
-            );
-          },
-        ),
-        _MenuOption(
-          icon: Icons.notifications,
-          title: 'Notifications',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.settings,
+                    color: AppTheme.darkGray,
+                    size: 24,
+                  ),
+                  SizedBox(width: spacing.md),
+                  Text(
+                    'Settings',
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.darkGray,
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
+            ),
+          ),
         ),
-        _MenuOption(
-          icon: Icons.help,
-          title: 'Help & Support',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const HelpSupportScreen(),
+        SizedBox(height: spacing.md),
+        
+        // Help and Support - Simple row
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const HelpSupportScreen(),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.sm,
+                vertical: spacing.md,
               ),
-            );
-          },
-        ),
-        _MenuOption(
-          icon: Icons.privacy_tip,
-          title: 'Privacy Policy',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const PrivacyPolicyScreen(),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.help_outline,
+                    color: AppTheme.darkGray,
+                    size: 24,
+                  ),
+                  SizedBox(width: spacing.md),
+                  Text(
+                    'Help and Support',
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.darkGray,
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
+            ),
+          ),
         ),
-        _MenuOption(
-          icon: Icons.info,
-          title: 'About',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const AboutScreen(),
+        
+        // About - Simple row
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const AboutScreen(),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.sm,
+                vertical: spacing.md,
               ),
-            );
-          },
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.darkGray,
+                    size: 24,
+                  ),
+                  SizedBox(width: spacing.md),
+                  Text(
+                    'About',
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.darkGray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-        SizedBox(height: spacing.lg),
-        _MenuOption(
-          icon: Icons.delete_outline,
-          title: 'Delete Account',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () => _showDeleteAccountDialog(context, ref),
-          isDestructive: true,
+        
+        SizedBox(height: spacing.md),
+        
+        // Delete Account - Simple row with red icon
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showDeleteAccountDialog(context, ref),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.sm,
+                vertical: spacing.md,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                    size: 24,
+                  ),
+                  SizedBox(width: spacing.md),
+                  Text(
+                    'Delete Account',
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-        _MenuOption(
-          icon: Icons.logout,
-          title: 'Logout',
-          textTheme: textTheme,
-          spacing: spacing,
-          onTap: () => _showLogoutDialog(context, ref),
-          isDestructive: true,
+        
+        SizedBox(height: spacing.md),
+        
+        // Logout - Red outline border
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.red,
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _showLogoutDialog(context, ref),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.md,
+                  vertical: spacing.md,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.logout,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                    SizedBox(width: spacing.md),
+                    Text(
+                      'Logout',
+                      style: textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        
+        SizedBox(height: spacing.xl),
+        
+        // Version text
+        Text(
+          'Version 1.0.0',
+          style: textTheme.bodyMedium?.copyWith(
+            color: AppTheme.mediumGray,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -566,9 +818,33 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              // Close the dialog first
               Navigator.of(context).pop();
-              ref.read(authProvider.notifier).logout();
+
+              // Trace start of logout flow
+              print('🔓 Logout requested from ProfileScreen');
+
+              // Await logout to ensure shared prefs are cleared and AuthNotifier state updates
+              await ref.read(authProvider.notifier).logout();
+
+              print('🔁 AuthNotifier.logout() completed');
+
+              // Reset bottom navigation to default (home/dashboard)
+              try {
+                ref.read(navigationProvider.notifier).setIndex(0);
+              } catch (_) {}
+
+              // Inform the user
+              if (context.mounted) {
+                SuccessSnackBar.show(context, message: 'Logged out successfully');
+              }
+
+              // Rely on the global auth state (AuthNotifier) to drive which root
+              // screen is shown. `main.dart` listens to `authProvider` and will
+              // automatically show `LoginScreen` when the user becomes
+              // unauthenticated. Avoid manual navigation here to prevent route
+              // conflicts and races.
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -585,117 +861,6 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _MenuOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-  final bool isDestructive;
-  final TextTheme textTheme;
-  final ResponsiveSpacing spacing;
-
-  const _MenuOption({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    required this.textTheme,
-    required this.spacing,
-    this.isDestructive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: spacing.sm),
-      child: Material(
-        color: Colors.white,
-        borderRadius: Responsive.borderRadius(
-          context,
-          mobile: 12,
-          tablet: 14,
-          desktop: 16,
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: Responsive.borderRadius(
-            context,
-            mobile: 12,
-            tablet: 14,
-            desktop: 16,
-          ),
-          child: Container(
-            padding: EdgeInsets.all(spacing.md),
-            decoration: BoxDecoration(
-              borderRadius: Responsive.borderRadius(
-                context,
-                mobile: 12,
-                tablet: 14,
-                desktop: 16,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: context.responsive<double>(
-                    mobile: 8,
-                    tablet: 10,
-                    desktop: 12,
-                  ),
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.sm),
-                  decoration: BoxDecoration(
-                    color: (isDestructive ? Colors.red : AppTheme.primaryOrange).withOpacity(0.1),
-                    borderRadius: Responsive.borderRadius(
-                      context,
-                      mobile: 8,
-                      tablet: 10,
-                      desktop: 12,
-                    ),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isDestructive ? Colors.red : AppTheme.primaryOrange,
-                    size: Responsive.iconSize(
-                      context,
-                      mobile: 20,
-                      tablet: 22,
-                      desktop: 24,
-                    ),
-                  ),
-                ),
-                SizedBox(width: spacing.md),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: isDestructive ? Colors.red : AppTheme.darkGray,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: AppTheme.mediumGray,
-                  size: Responsive.iconSize(
-                    context,
-                    mobile: 20,
-                    tablet: 22,
-                    desktop: 24,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

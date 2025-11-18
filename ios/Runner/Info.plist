@@ -45,15 +45,26 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-	<key>UIStatusBarHidden</key>
+		<key>UIStatusBarHidden</key>
+		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>Now Delivery needs access to your camera to scan barcodes, take profile pictures and capture delivery documentation photos.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Now Delivery needs access to your photo library to select profile pictures and delivery documentation photos.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Now Delivery needs permission to save photos to your photo library.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Now Delivery needs access to your microphone for video capture if needed.</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSCameraUsageDescription</key>
-	<string>Now Delivery needs access to your camera to scan barcodes, take profile pictures and capture delivery documentation photos.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Now Delivery needs access to your photo library to select profile pictures and delivery documentation photos.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Now Delivery needs permission to save photos to your photo library.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Now Delivery needs access to your microphone for video capture if needed.</string>
+	<!-- Firebase Configuration -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<!-- Background modes for remote notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

@@ -1,0 +1,216 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/pickup.dart';
+
+class PickupsApiService {
+  static const String baseUrl = 'https://nowshipping.co/api/v1';
+
+  /// Get authentication headers with bearer token
+  static Future<Map<String, String>> _authHeaders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token') ?? prefs.getString('token');
+    
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Connection': 'keep-alive',
+      'Cache-Control': 'no-cache',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
+  /// Fetch all pickups for the courier
+  static Future<List<Pickup>> fetchPickups() async {
+    final url = Uri.parse('$baseUrl/courier/pickups');
+    final headers = await _authHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Pickup.fromJson(json as Map<String, dynamic>)).toList();
+      } else {
+        throw Exception('Failed to fetch pickups: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching pickups: $e');
+    }
+  }
+
+  /// Fetch a single pickup by ID
+  static Future<Pickup> fetchPickupById(String pickupId) async {
+    final url = Uri.parse('$baseUrl/courier/pickups/$pickupId');
+    final headers = await _authHeaders();
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return Pickup.fromJson(data);
+      } else {
+        throw Exception('Failed to fetch pickup: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching pickup: $e');
+    }
+  }
+
+  /// Fetch pickup details by pickup number
+  static Future<Pickup> fetchPickupDetails(String pickupNumber) async {
+    final url = Uri.parse('$baseUrl/courier/pickups/$pickupNumber/details');
+    final headers = await _authHeaders();
+
+    print('🚀 [API] Fetching pickup details: $pickupNumber');
+    print('📍 URL: $url');
+    print('📋 Headers: $headers');
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Body (first 500 chars): ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}...');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final pickupData = data['pickup'] as Map<String, dynamic>;
+        
+        print('✅ Successfully fetched pickup details: $pickupNumber');
+        return Pickup.fromJson(pickupData);
+      } else {
+        print('❌ Failed to fetch pickup details: ${response.statusCode}');
+        throw Exception('Failed to fetch pickup details: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('💥 Error fetching pickup details: $e');
+      throw Exception('Error fetching pickup details: $e');
+    }
+  }
+
+  /// Scan barcode and add order to pickup
+  static Future<Map<String, dynamic>> scanOrderBarcode({
+    required String pickupNumber,
+    required String orderNumber,
+  }) async {
+    final url = Uri.parse('$baseUrl/courier/pickups/$pickupNumber/orders/$orderNumber');
+    final headers = await _authHeaders();
+
+    print('📷 [API] Scanning barcode for order: $orderNumber');
+    print('📍 URL: $url');
+    print('📋 Headers: $headers');
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('✅ Order scanned successfully: $orderNumber');
+        return data;
+      } else {
+        print('❌ Failed to scan order: ${response.statusCode}');
+        throw Exception('Failed to scan order: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('💥 Error scanning order: $e');
+      throw Exception('Error scanning order: $e');
+    }
+  }
+
+  /// Get all picked up orders for a pickup
+  static Future<List<Map<String, dynamic>>> getPickedUpOrders(String pickupNumber) async {
+    final url = Uri.parse('$baseUrl/courier/pickups/$pickupNumber/orders');
+    final headers = await _authHeaders();
+
+    print('📦 [API] Fetching picked up orders for pickup: $pickupNumber');
+    print('📍 URL: $url');
+    print('📋 Headers: $headers');
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Body (first 500 chars): ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}...');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> ordersData = data['orders'] as List<dynamic>;
+        
+        print('✅ Successfully fetched ${ordersData.length} picked up orders');
+        return ordersData.map((order) => order as Map<String, dynamic>).toList();
+      } else {
+        print('❌ Failed to fetch picked up orders: ${response.statusCode}');
+        throw Exception('Failed to fetch picked up orders: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('💥 Error fetching picked up orders: $e');
+      throw Exception('Error fetching picked up orders: $e');
+    }
+  }
+
+  /// Delete an order from a pickup
+  static Future<Map<String, dynamic>> deleteOrderFromPickup({
+    required String pickupNumber,
+    required String orderNumber,
+  }) async {
+    final url = Uri.parse('$baseUrl/courier/pickups/$pickupNumber/orders/$orderNumber');
+    final headers = await _authHeaders();
+
+    print('🗑️ [API] Deleting order from pickup: $orderNumber');
+    print('📍 URL: $url');
+    print('📋 Headers: $headers');
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('✅ Order deleted successfully: $orderNumber');
+        return data;
+      } else {
+        print('❌ Failed to delete order: ${response.statusCode}');
+        throw Exception('Failed to delete order: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('💥 Error deleting order: $e');
+      throw Exception('Error deleting order: $e');
+    }
+  }
+
+  /// Complete a pickup
+  static Future<Map<String, dynamic>> completePickup(String pickupNumber) async {
+    final url = Uri.parse('$baseUrl/courier/pickups/$pickupNumber/complete');
+    final headers = await _authHeaders();
+
+    print('✅ [API] Completing pickup: $pickupNumber');
+    print('📍 URL: $url');
+    print('📋 Headers: $headers');
+
+    try {
+      final response = await http.put(url, headers: headers);
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('✅ Pickup completed successfully: $pickupNumber');
+        return data;
+      } else {
+        print('❌ Failed to complete pickup: ${response.statusCode}');
+        throw Exception('Failed to complete pickup: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('💥 Error completing pickup: $e');
+      throw Exception('Error completing pickup: $e');
+    }
+  }
+}
