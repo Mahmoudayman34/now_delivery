@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "co.nowshipping.nowcourier"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -27,10 +27,14 @@ android {
     defaultConfig {
         applicationId = "co.nowshipping.nowcourier"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 7
-        versionName = "1.0.7"
+        targetSdk = 36
+        versionCode = 10
+        versionName = "1.2.0"
         multiDexEnabled = true
+        
+        ndk {
+            debugSymbolLevel = "FULL"
+        }
     }
 
     signingConfigs {
@@ -57,6 +61,12 @@ android {
             )
         }
     }
+    
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
 }
 
 flutter {
@@ -65,7 +75,7 @@ flutter {
 
 dependencies {
     // Core library desugaring
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))

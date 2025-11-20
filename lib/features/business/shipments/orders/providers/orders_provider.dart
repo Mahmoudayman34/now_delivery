@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order.dart';
 import '../services/orders_api_service.dart';
-
+import 'package:flutter_riverpod/legacy.dart';
 /// Provider for managing orders data
 final ordersProvider = StateNotifierProvider<OrdersNotifier, AsyncValue<Map<String, List<Order>>>>((ref) {
   return OrdersNotifier();

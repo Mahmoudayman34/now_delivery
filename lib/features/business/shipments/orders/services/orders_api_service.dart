@@ -162,20 +162,40 @@ class OrdersApiService {
 
   /// Complete order with OTP verification
   /// 
+  /// Completes an order delivery. Handles different order types including standard deliveries,
+  /// returns, exchanges, and cash collections. Requires OTP verification for non-return flows.
+  /// 
   /// [orderNumber] - The order number to complete
-  /// [otp] - The OTP code provided by customer
-  static Future<void> completeOrder({
+  /// [otp] - The 6-digit OTP code provided by customer (required for non-return orders)
+  /// [collectionReceipt] - Optional receipt/proof URL for cash collection orders
+  /// [exchangePhotos] - Optional array of photo URLs for exchange orders
+  /// 
+  /// Returns the success message from the API
+  static Future<String> completeOrder({
     required String orderNumber,
-    required String otp,
+    String? otp,
+    String? collectionReceipt,
+    List<String>? exchangePhotos,
   }) async {
-    // TODO: Replace with actual complete order endpoint when available
-    // For now, using the status endpoint as a placeholder
     final url = Uri.parse('$baseUrl/courier/orders/$orderNumber/complete');
     final headers = await _authHeaders();
 
-    final body = jsonEncode({
-      'otp': otp,
-    });
+    // Build request body - only include fields that are provided
+    final Map<String, dynamic> bodyMap = {};
+    
+    if (otp != null && otp.isNotEmpty) {
+      bodyMap['otp'] = otp;
+    }
+    
+    if (collectionReceipt != null && collectionReceipt.isNotEmpty) {
+      bodyMap['collectionReceipt'] = collectionReceipt;
+    }
+    
+    if (exchangePhotos != null && exchangePhotos.isNotEmpty) {
+      bodyMap['exchangePhotos'] = exchangePhotos;
+    }
+
+    final body = jsonEncode(bodyMap);
 
     print('🚀 [API] Completing order: $orderNumber');
     print('📍 URL: $url');
@@ -188,17 +208,92 @@ class OrdersApiService {
       print('📥 Response Status: ${response.statusCode}');
       print('📦 Response Body: ${response.body}');
 
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ Successfully completed order with OTP');
-        // Success
-        return;
+        final message = responseData['message'] as String? ?? 'Order completed successfully';
+        print('✅ Successfully completed order: $message');
+        return message;
       } else {
-        print('❌ Failed to complete order: ${response.statusCode}');
-        throw Exception('Failed to complete order: ${response.statusCode} - ${response.body}');
+        // Parse error message from API response
+        final errorMessage = responseData['message'] as String? ?? 
+                            'Failed to complete order: ${response.statusCode}';
+        print('❌ Failed to complete order: ${response.statusCode} - $errorMessage');
+        
+        // Throw specific error based on status code
+        if (response.statusCode == 400) {
+          throw Exception(errorMessage);
+        } else if (response.statusCode == 401) {
+          throw Exception('Unauthorized: Please login again');
+        } else if (response.statusCode == 404) {
+          throw Exception(errorMessage);
+        } else {
+          throw Exception(errorMessage);
+        }
       }
     } catch (e) {
       print('💥 Error completing order: $e');
+      // Re-throw if it's already an Exception with a message
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Error completing order: $e');
+    }
+  }
+
+  /// Scan barcode for fast shipping order
+  /// 
+  /// Scans a fast shipping (express) order and marks packed/shipping/outForDelivery as completed.
+  /// Moves the status to headingToCustomer for customer delivery.
+  /// 
+  /// [orderNumber] - The order number or Smart Flyer barcode to scan
+  /// 
+  /// Returns the updated order information
+  static Future<Map<String, dynamic>> scanFastShippingOrder({
+    required String orderNumber,
+  }) async {
+    final url = Uri.parse('$baseUrl/courier/orders/$orderNumber/scan-fast-shipping');
+    final headers = await _authHeaders();
+
+    print('📷 [API] Scanning fast shipping order: $orderNumber');
+    print('📍 URL: $url');
+    print('📋 Headers: $headers');
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📦 Response Body: ${response.body}');
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ Successfully scanned fast shipping order: $orderNumber');
+        return responseData;
+      } else {
+        // Parse error message from API response
+        final errorMessage = responseData['message'] as String? ?? 
+                            'Failed to scan order: ${response.statusCode}';
+        print('❌ Failed to scan order: ${response.statusCode} - $errorMessage');
+        
+        // Throw specific error based on status code
+        if (response.statusCode == 400) {
+          throw Exception(errorMessage);
+        } else if (response.statusCode == 403) {
+          throw Exception(errorMessage);
+        } else if (response.statusCode == 404) {
+          throw Exception(errorMessage);
+        } else {
+          throw Exception(errorMessage);
+        }
+      }
+    } catch (e) {
+      print('💥 Error scanning order: $e');
+      // Re-throw if it's already an Exception with a message
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Error scanning order: $e');
     }
   }
 }

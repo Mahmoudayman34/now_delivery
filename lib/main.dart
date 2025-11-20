@@ -11,6 +11,7 @@ import 'features/onboarding/screens/onboarding_screen.dart';
 import 'features/onboarding/providers/onboarding_provider.dart';
 import 'features/business/dashboard/providers/driver_status_provider.dart';
 import 'core/services/firebase_messaging_service.dart';
+import 'core/services/background_location_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +43,14 @@ void main() async {
     } catch (e) {
       debugPrint('❌ Error initializing Firebase Messaging: $e');
     }
+  }
+  
+  // Initialize Background Location Service
+  try {
+    await BackgroundLocationService.initialize();
+    debugPrint('✅ Background location service initialized successfully');
+  } catch (e) {
+    debugPrint('❌ Error initializing background location service: $e');
   }
   
   runApp(const ProviderScope(child: MyApp()));

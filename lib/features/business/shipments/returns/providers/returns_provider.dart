@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/return_shipment.dart';
 import '../services/returns_api_service.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 /// Provider for managing returns data
 final returnsProvider = StateNotifierProvider<ReturnsNotifier, AsyncValue<Map<String, List<ReturnShipment>>>>((ref) {

@@ -21,6 +21,16 @@ class Order {
   final bool isExpressShipping;
   final String? specialInstructions;
   final String? smartFlyerBarcode;
+  
+  // Business information fields
+  final String? businessName;
+  final String? businessPhone;
+  final String? businessAddress;
+  final String? businessNearbyLandmark;
+  final String? businessCity;
+  final String? businessZone;
+  final double? businessLatitude;
+  final double? businessLongitude;
 
   const Order({
     required this.id,
@@ -44,6 +54,14 @@ class Order {
     required this.isExpressShipping,
     this.specialInstructions,
     this.smartFlyerBarcode,
+    this.businessName,
+    this.businessPhone,
+    this.businessAddress,
+    this.businessNearbyLandmark,
+    this.businessCity,
+    this.businessZone,
+    this.businessLatitude,
+    this.businessLongitude,
   });
 
   /// Get display order number with fallback to ID
@@ -127,6 +145,42 @@ class Order {
       amountType = orderShipping['amountType'] as String;
     }
     
+    // Extract business information if available
+    String? businessName;
+    String? businessPhone;
+    String? businessAddress;
+    String? businessNearbyLandmark;
+    String? businessCity;
+    String? businessZone;
+    double? businessLatitude;
+    double? businessLongitude;
+    
+    if (business.isNotEmpty) {
+      businessName = business['name'] as String? ?? 
+                     business['brandInfo']?['brandName'] as String?;
+      
+      final pickUpAddress = business['pickUpAdress'] as Map<String, dynamic>?;
+      if (pickUpAddress != null) {
+        // Get phone from pickUpAdress.pickupPhone
+        businessPhone = pickUpAddress['pickupPhone'] as String?;
+        businessAddress = pickUpAddress['adressDetails'] as String?;
+        businessNearbyLandmark = pickUpAddress['nearbyLandmark'] as String?;
+        businessCity = pickUpAddress['city'] as String?;
+        businessZone = pickUpAddress['zone'] as String?;
+        
+        final coordinates = pickUpAddress['coordinates'] as Map<String, dynamic>?;
+        if (coordinates != null) {
+          businessLatitude = (coordinates['lat'] as num?)?.toDouble();
+          businessLongitude = (coordinates['lng'] as num?)?.toDouble();
+        }
+      }
+      
+      // Fallback to business.phoneNumber if pickupPhone is not available
+      if (businessPhone == null || businessPhone.isEmpty) {
+        businessPhone = business['phoneNumber'] as String?;
+      }
+    }
+    
     return Order(
       id: json['_id'] as String? ?? '',
       orderNumber: (json['orderNumber']?.toString() ?? '').isNotEmpty 
@@ -157,6 +211,14 @@ class Order {
       isExpressShipping: json['isExpressShipping'] as bool? ?? orderShipping['isExpressShipping'] as bool? ?? false,
       specialInstructions: json['orderNotes'] as String?,
       smartFlyerBarcode: json['smartFlyerBarcode'] as String?,
+      businessName: businessName,
+      businessPhone: businessPhone,
+      businessAddress: businessAddress,
+      businessNearbyLandmark: businessNearbyLandmark,
+      businessCity: businessCity,
+      businessZone: businessZone,
+      businessLatitude: businessLatitude,
+      businessLongitude: businessLongitude,
     );
   }
 

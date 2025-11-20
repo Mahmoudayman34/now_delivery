@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/pickup.dart';
 import '../services/pickups_api_service.dart';
-
+import 'package:flutter_riverpod/legacy.dart';
 /// Provider for managing pickups data
 final pickupsProvider = StateNotifierProvider<PickupsNotifier, AsyncValue<Map<String, List<Pickup>>>>((ref) {
   return PickupsNotifier();

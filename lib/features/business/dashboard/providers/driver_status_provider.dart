@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/services/location_service.dart';
+import '../../../../core/services/location_tracking_manager.dart';
+import '../../../../core/services/background_location_service.dart';
 
 final driverStatusProvider = StateNotifierProvider<DriverStatusNotifier, DriverStatus>((ref) {
   return DriverStatusNotifier(ref);
@@ -19,10 +22,14 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
     BuildContext? context,
   }) async {
     final locationService = _ref.read(locationServiceProvider);
+    final trackingManager = _ref.read(locationTrackingManagerProvider);
     
     if (state.isOnline) {
       // Going offline - stop location tracking
       locationService.stopLocationTracking();
+      trackingManager.stopTracking();
+      await BackgroundLocationService.stopPeriodicLocationUpdates();
+      trackingManager.sendStatusUpdate(false);
       state = state.copyWith(isOnline: false);
     } else {
       // Going online - start location tracking
@@ -31,6 +38,11 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
         context: context,
       );
       if (success) {
+        // Also start server-side tracking
+        await trackingManager.initialize();
+        await trackingManager.startTracking(context: context);
+        await BackgroundLocationService.startPeriodicLocationUpdates();
+        trackingManager.sendStatusUpdate(true);
         state = state.copyWith(isOnline: true);
       } else {
         // Handle permission denied or location services disabled
@@ -53,6 +65,7 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
     if (state.isOnline == isOnline) return;
     
     final locationService = _ref.read(locationServiceProvider);
+    final trackingManager = _ref.read(locationTrackingManagerProvider);
     
     if (isOnline) {
       final success = await locationService.startLocationTracking(
@@ -60,6 +73,11 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
         context: context,
       );
       if (success) {
+        // Also start server-side tracking
+        await trackingManager.initialize();
+        await trackingManager.startTracking(context: context);
+        await BackgroundLocationService.startPeriodicLocationUpdates();
+        trackingManager.sendStatusUpdate(true);
         state = state.copyWith(isOnline: true, errorMessage: null);
       } else {
         state = state.copyWith(
@@ -69,6 +87,9 @@ class DriverStatusNotifier extends StateNotifier<DriverStatus> {
       }
     } else {
       locationService.stopLocationTracking();
+      trackingManager.stopTracking();
+      await BackgroundLocationService.stopPeriodicLocationUpdates();
+      trackingManager.sendStatusUpdate(false);
       state = state.copyWith(isOnline: false, errorMessage: null);
     }
   }

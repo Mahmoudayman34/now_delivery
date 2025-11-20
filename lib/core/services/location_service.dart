@@ -146,7 +146,7 @@ class LocationService {
 
       const LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // Update every 10 meters
+        distanceFilter: 0, // No distance filter - rely on timer
       );
 
       _positionStreamSubscription = Geolocator.getPositionStream(
@@ -175,7 +175,7 @@ class LocationService {
       
       // Print initial status
       print('🟢 DRIVER STATUS: ONLINE');
-      print('📡 Location tracking started - updates every 10 meters');
+      print('📡 Location tracking started - updates every 25 seconds');
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       
       return true;

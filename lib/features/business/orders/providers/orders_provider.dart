@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order.dart';
-
+import 'package:flutter_riverpod/legacy.dart';
 final ordersProvider = StateNotifierProvider<OrdersNotifier, OrdersState>((ref) {
   return OrdersNotifier();
 });

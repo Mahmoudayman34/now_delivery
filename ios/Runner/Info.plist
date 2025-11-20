@@ -60,11 +60,19 @@
 	<!-- Firebase Configuration -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
-	<!-- Background modes for remote notifications -->
+	<!-- Background modes for remote notifications and location -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>location</string>
 	</array>
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Now Delivery needs your location to track deliveries and update your position for customers to see.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Now Delivery needs your location to track deliveries even when the app is in the background, ensuring accurate delivery updates for customers.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Now Delivery needs your location to track deliveries in the background and provide real-time updates to customers.</string>
 </dict>
 </plist>
