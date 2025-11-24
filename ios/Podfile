@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '12.0'
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -32,9 +32,6 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  
-  # Required for mobile_scanner to work properly on iOS
-  pod 'GoogleMLKit/BarcodeScanning', '3.2.0'
 end
 
 post_install do |installer|
@@ -43,7 +40,7 @@ post_install do |installer|
     
     # Fix for iOS deployment target warnings
     target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
       
       # Enable bitcode if needed
       config.build_settings['ENABLE_BITCODE'] = 'NO'
