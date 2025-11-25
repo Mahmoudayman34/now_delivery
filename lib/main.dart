@@ -12,6 +12,7 @@ import 'features/onboarding/providers/onboarding_provider.dart';
 import 'features/business/dashboard/providers/driver_status_provider.dart';
 import 'core/services/firebase_messaging_service.dart';
 import 'core/services/background_location_service.dart';
+import 'core/widgets/offline_banner.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -103,9 +104,22 @@ class _MyAppState extends ConsumerState<MyApp> {
 
     return MaterialApp(
       navigatorKey: _rootNavigatorKey,
-      title: 'Now Delivery',
+      title: 'Now Shipping Courier',
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            child!,
+            const Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: OfflineBanner(),
+            ),
+          ],
+        );
+      },
       home: Consumer(
         builder: (context, ref, child) {
           final onboardingState = ref.watch(onboardingProvider);

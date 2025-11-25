@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../../core/utils/error_message_parser.dart';
 import '../models/pickup.dart';
 
 class PickupsApiService {
@@ -33,10 +34,18 @@ class PickupsApiService {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => Pickup.fromJson(json as Map<String, dynamic>)).toList();
       } else {
-        throw Exception('Failed to fetch pickups: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch pickups',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      throw Exception('Error fetching pickups: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch pickups',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -52,10 +61,18 @@ class PickupsApiService {
         final Map<String, dynamic> data = jsonDecode(response.body);
         return Pickup.fromJson(data);
       } else {
-        throw Exception('Failed to fetch pickup: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch pickup',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      throw Exception('Error fetching pickup: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch pickup',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -82,11 +99,19 @@ class PickupsApiService {
         return Pickup.fromJson(pickupData);
       } else {
         print('❌ Failed to fetch pickup details: ${response.statusCode}');
-        throw Exception('Failed to fetch pickup details: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch pickup details',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching pickup details: $e');
-      throw Exception('Error fetching pickup details: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch pickup details',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -114,11 +139,19 @@ class PickupsApiService {
         return data;
       } else {
         print('❌ Failed to scan order: ${response.statusCode}');
-        throw Exception('Failed to scan order: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to scan order',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error scanning order: $e');
-      throw Exception('Error scanning order: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to scan order',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -145,11 +178,19 @@ class PickupsApiService {
         return ordersData.map((order) => order as Map<String, dynamic>).toList();
       } else {
         print('❌ Failed to fetch picked up orders: ${response.statusCode}');
-        throw Exception('Failed to fetch picked up orders: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch picked up orders',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching picked up orders: $e');
-      throw Exception('Error fetching picked up orders: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch picked up orders',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -177,11 +218,19 @@ class PickupsApiService {
         return data;
       } else {
         print('❌ Failed to delete order: ${response.statusCode}');
-        throw Exception('Failed to delete order: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to delete order',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error deleting order: $e');
-      throw Exception('Error deleting order: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to delete order',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -206,11 +255,19 @@ class PickupsApiService {
         return data;
       } else {
         print('❌ Failed to complete pickup: ${response.statusCode}');
-        throw Exception('Failed to complete pickup: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to complete pickup',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error completing pickup: $e');
-      throw Exception('Error completing pickup: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to complete pickup',
+      );
+      throw Exception(errorMessage);
     }
   }
 }

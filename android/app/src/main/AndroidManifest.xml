@@ -28,7 +28,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:label="now_delivery"
+        android:label="Now Shipping Courier"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

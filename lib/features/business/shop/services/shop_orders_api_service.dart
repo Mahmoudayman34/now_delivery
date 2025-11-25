@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../core/utils/error_message_parser.dart';
 import '../models/shop_order.dart';
 
 class ShopOrdersApiService {
@@ -51,11 +51,19 @@ class ShopOrdersApiService {
         return orders;
       } else {
         print('❌ Failed to fetch shop orders: ${response.statusCode}');
-        throw Exception('Failed to fetch shop orders: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch shop orders',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching shop orders: $e');
-      throw Exception('Error fetching shop orders: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch shop orders',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -81,11 +89,19 @@ class ShopOrdersApiService {
         return ShopOrder.fromJson(data);
       } else {
         print('❌ Failed to fetch shop order details: ${response.statusCode}');
-        throw Exception('Failed to fetch shop order details: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch shop order details',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching shop order details: $e');
-      throw Exception('Error fetching shop order details: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch shop order details',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -132,11 +148,19 @@ class ShopOrdersApiService {
         return data;
       } else {
         print('❌ Failed to update shop order status: ${response.statusCode}');
-        throw Exception('Failed to update shop order status: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to update shop order status',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error updating shop order status: $e');
-      throw Exception('Error updating shop order status: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to update shop order status',
+      );
+      throw Exception(errorMessage);
     }
   }
 }

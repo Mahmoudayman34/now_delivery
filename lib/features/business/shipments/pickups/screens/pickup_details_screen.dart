@@ -25,19 +25,12 @@ class _PickupDetailsScreenState extends State<PickupDetailsScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   final List<Order> _scannedOrders = [];
-  MobileScannerController? _scannerController;
 
   @override
   void initState() {
     super.initState();
     _fetchPickupDetails();
     _loadPickedUpOrders();
-  }
-
-  @override
-  void dispose() {
-    _scannerController?.dispose();
-    super.dispose();
   }
 
   Future<void> _fetchPickupDetails() async {
@@ -1032,68 +1025,19 @@ class _PickupDetailsScreenState extends State<PickupDetailsScreen> {
   }
 
   void _showScannerDialog() {
-    _scannerController = MobileScannerController();
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Container(
-            height: 400,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Scan Order Barcode',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        _scannerController?.dispose();
-                        Navigator.of(context).pop();
-                      },
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: MobileScanner(
-                    controller: _scannerController,
-                    onDetect: (BarcodeCapture capture) {
-                      final List<Barcode> barcodes = capture.barcodes;
-                      if (barcodes.isNotEmpty) {
-                        final String? code = barcodes.first.rawValue;
-                        if (code != null && code.isNotEmpty) {
-                          _scannerController?.dispose();
-                          Navigator.of(context).pop();
-                          _scanBarcode(code);
-                        }
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Position the barcode within the frame',
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    ).then((_) {
-      _scannerController?.dispose();
-      _scannerController = null;
-    });
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (BuildContext context) {
+          return _PickupScanScreen(
+            onScan: (String barcode) {
+              Navigator.of(context).pop();
+              _scanBarcode(barcode);
+            },
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _showCompletePickupDialog(BuildContext context, Pickup pickup) async {
@@ -1255,6 +1199,125 @@ class _PickupDetailsScreenState extends State<PickupDetailsScreen> {
           ],
         );
       },
+    );
+  }
+}
+
+// Full Screen Pickup Scan Screen
+class _PickupScanScreen extends StatefulWidget {
+  final Function(String) onScan;
+
+  const _PickupScanScreen({
+    required this.onScan,
+  });
+
+  @override
+  State<_PickupScanScreen> createState() => _PickupScanScreenState();
+}
+
+class _PickupScanScreenState extends State<_PickupScanScreen> {
+  MobileScannerController? _scannerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scannerController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = AppTheme.spacing(context);
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text(
+          'Scan Order Barcode',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: AppTheme.primaryOrange,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Stack(
+        children: [
+          // Full Screen Scanner
+          MobileScanner(
+            controller: _scannerController,
+            onDetect: (BarcodeCapture capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty) {
+                final String? code = barcodes.first.rawValue;
+                if (code != null && code.isNotEmpty) {
+                  widget.onScan(code);
+                }
+              }
+            },
+          ),
+
+          // Info Banner at Bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.all(spacing.md),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.8),
+                    Colors.black,
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: Container(
+                  padding: EdgeInsets.all(spacing.md),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryOrange.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.primaryOrange,
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.white, size: 24),
+                      SizedBox(width: spacing.sm),
+                      Expanded(
+                        child: Text(
+                          'Position the barcode within the frame',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

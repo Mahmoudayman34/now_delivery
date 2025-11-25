@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/error_message_parser.dart';
 
 class ApiService {
   static const String baseUrl = 'https://nowshipping.co/api/v1';
@@ -27,7 +28,11 @@ class ApiService {
 
   static void _throwIfFailed(http.Response res) {
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('API ${res.request?.url} failed: ${res.statusCode} ${res.body}');
+      final errorMessage = ErrorMessageParser.parseHttpError(
+        res,
+        defaultMessage: 'API request failed',
+      );
+      throw Exception(errorMessage);
     }
   }
 }

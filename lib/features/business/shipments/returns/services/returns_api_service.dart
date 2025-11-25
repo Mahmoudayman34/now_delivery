@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../../core/utils/error_message_parser.dart';
 import '../models/return_shipment.dart';
 
 class ReturnsApiService {
@@ -34,10 +35,18 @@ class ReturnsApiService {
             .map((json) => ReturnShipment.fromJson(json as Map<String, dynamic>))
             .toList();
       } else {
-        throw Exception('Failed to load returns: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to load returns',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      throw Exception('Error fetching returns: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch returns',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -65,10 +74,18 @@ class ReturnsApiService {
         final Map<String, dynamic> data = json.decode(response.body);
         return ReturnShipment.fromJson(data);
       } else {
-        throw Exception('Failed to load return: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to load return',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      throw Exception('Error fetching return: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch return',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -109,11 +126,19 @@ class ReturnsApiService {
         return data;
       } else {
         print('❌ Failed to fetch return details: ${response.statusCode}');
-        throw Exception('Failed to fetch return details: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch return details',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching return details: $e');
-      throw Exception('Error fetching return details: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch return details',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -141,11 +166,19 @@ class ReturnsApiService {
         return data;
       } else {
         print('❌ Failed to pickup return: ${response.statusCode}');
-        throw Exception('Failed to pickup return: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to pickup return',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error picking up return: $e');
-      throw Exception('Error picking up return: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to pickup return',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -172,11 +205,19 @@ class ReturnsApiService {
         return data;
       } else {
         print('❌ Failed to complete return to business: ${response.statusCode}');
-        throw Exception('Failed to complete return to business: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to complete return to business',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error completing return to business: $e');
-      throw Exception('Error completing return to business: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to complete return to business',
+      );
+      throw Exception(errorMessage);
     }
   }
 }

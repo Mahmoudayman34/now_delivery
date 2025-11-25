@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/error_message_parser.dart';
 import 'tracking_api_config.dart';
 
 // Provider for location tracking API service
@@ -46,13 +47,21 @@ class LocationTrackingApiService {
       if (response.statusCode == 200 && data['success'] == true) {
         return {'success': true, 'message': data['message']};
       } else {
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to update location',
+        );
         return {
           'success': false,
-          'message': data['message'] ?? 'Failed to update location',
+          'message': errorMessage,
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Network error occurred',
+      );
+      return {'success': false, 'message': errorMessage};
     }
   }
   
@@ -75,13 +84,21 @@ class LocationTrackingApiService {
       if (response.statusCode == 200 && data['success'] == true) {
         return {'success': true, 'message': data['message']};
       } else {
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to update preferences',
+        );
         return {
           'success': false,
-          'message': data['message'] ?? 'Failed to update preferences',
+          'message': errorMessage,
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Network error occurred',
+      );
+      return {'success': false, 'message': errorMessage};
     }
   }
   
@@ -103,13 +120,21 @@ class LocationTrackingApiService {
           'currentLocation': data['currentLocation'],
         };
       } else {
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to get status',
+        );
         return {
           'success': false,
-          'message': data['message'] ?? 'Failed to get status',
+          'message': errorMessage,
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: $e'};
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Network error occurred',
+      );
+      return {'success': false, 'message': errorMessage};
     }
   }
 }

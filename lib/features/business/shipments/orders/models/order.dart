@@ -67,7 +67,10 @@ class Order {
   /// Get display order number with fallback to ID
   String get displayOrderNumber => orderNumber.isNotEmpty ? orderNumber : id.substring(0, 8);
 
-  factory Order.fromJson(Map<String, dynamic> json) {
+  factory Order.fromJson(
+    Map<String, dynamic> json, {
+    Map<String, dynamic>? selectedPickupAddress,
+  }) {
     // Handle both order details API format and pickup API format
     final orderCustomer = json['orderCustomer'] as Map<String, dynamic>? ?? {};
     final orderShipping = json['orderShipping'] as Map<String, dynamic>? ?? {};
@@ -156,19 +159,28 @@ class Order {
     double? businessLongitude;
     
     if (business.isNotEmpty) {
-      businessName = business['name'] as String? ?? 
-                     business['brandInfo']?['brandName'] as String?;
+      // Priority: brandInfo.brandName first, then business.name
+      businessName = business['brandInfo']?['brandName'] as String? ?? 
+                     business['name'] as String?;
       
-      final pickUpAddress = business['pickUpAdress'] as Map<String, dynamic>?;
-      if (pickUpAddress != null) {
-        // Get phone from pickUpAdress.pickupPhone
-        businessPhone = pickUpAddress['pickupPhone'] as String?;
-        businessAddress = pickUpAddress['adressDetails'] as String?;
-        businessNearbyLandmark = pickUpAddress['nearbyLandmark'] as String?;
-        businessCity = pickUpAddress['city'] as String?;
-        businessZone = pickUpAddress['zone'] as String?;
+      // Use selectedPickupAddress if available (matches selectedPickupAddressId)
+      // Otherwise fallback to pickUpAdress
+      Map<String, dynamic>? pickupAddressData;
+      if (selectedPickupAddress != null && selectedPickupAddress.isNotEmpty) {
+        pickupAddressData = selectedPickupAddress;
+      } else {
+        pickupAddressData = business['pickUpAdress'] as Map<String, dynamic>?;
+      }
+      
+      if (pickupAddressData != null) {
+        // Get phone from pickup address
+        businessPhone = pickupAddressData['pickupPhone'] as String?;
+        businessAddress = pickupAddressData['adressDetails'] as String?;
+        businessNearbyLandmark = pickupAddressData['nearbyLandmark'] as String?;
+        businessCity = pickupAddressData['city'] as String?;
+        businessZone = pickupAddressData['zone'] as String?;
         
-        final coordinates = pickUpAddress['coordinates'] as Map<String, dynamic>?;
+        final coordinates = pickupAddressData['coordinates'] as Map<String, dynamic>?;
         if (coordinates != null) {
           businessLatitude = (coordinates['lat'] as num?)?.toDouble();
           businessLongitude = (coordinates['lng'] as num?)?.toDouble();

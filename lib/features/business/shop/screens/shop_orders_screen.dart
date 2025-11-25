@@ -819,11 +819,13 @@ class _ShopOrdersScreenState extends ConsumerState<ShopOrdersScreen> with Single
 
   Widget _buildErrorState(Object error, TextTheme textTheme, ResponsiveSpacing spacing) {
     return Center(
-      child: Padding(
-        padding: EdgeInsets.all(spacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(spacing.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
@@ -862,23 +864,6 @@ class _ShopOrdersScreenState extends ConsumerState<ShopOrdersScreen> with Single
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: spacing.md),
-            Container(
-              padding: EdgeInsets.all(spacing.md),
-              decoration: BoxDecoration(
-                color: Colors.red[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.withOpacity(0.2)),
-              ),
-              child: Text(
-                error.toString(),
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: Colors.red[700],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
             SizedBox(height: spacing.xl),
             ElevatedButton.icon(
               onPressed: () => ref.read(shopOrdersProvider.notifier).refresh(),
@@ -904,6 +889,7 @@ class _ShopOrdersScreenState extends ConsumerState<ShopOrdersScreen> with Single
               ),
             ),
           ],
+        ),
         ),
       ),
     );

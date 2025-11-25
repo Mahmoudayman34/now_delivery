@@ -24,7 +24,7 @@ class PickupsNotifier extends StateNotifier<AsyncValue<Map<String, List<Pickup>>
       // Filter out completed pickups
       final activePickups = pickups.where((pickup) => pickup.status != PickupStatus.completed).toList();
       
-      // Group pickups by zone (city)
+      // Group pickups by zone
       final groupedPickups = _groupPickupsByZone(activePickups);
       
       state = AsyncValue.data(groupedPickups);
@@ -33,13 +33,13 @@ class PickupsNotifier extends StateNotifier<AsyncValue<Map<String, List<Pickup>>
     }
   }
 
-  /// Group pickups by their zone (city)
+  /// Group pickups by their zone
   Map<String, List<Pickup>> _groupPickupsByZone(List<Pickup> pickups) {
     final Map<String, List<Pickup>> grouped = {};
     
     for (final pickup in pickups) {
-      // Use merchant city as the zone
-      final zone = pickup.merchantCity;
+      // Use merchant zone for grouping
+      final zone = pickup.merchantZone;
       
       if (!grouped.containsKey(zone)) {
         grouped[zone] = [];
@@ -47,14 +47,30 @@ class PickupsNotifier extends StateNotifier<AsyncValue<Map<String, List<Pickup>>
       grouped[zone]!.add(pickup);
     }
     
-    // Sort zones alphabetically
-    final sortedKeys = grouped.keys.toList()..sort();
-    final sortedMap = <String, List<Pickup>>{};
-    for (final key in sortedKeys) {
-      sortedMap[key] = grouped[key]!;
+    // Sort items within each zone by date (newest first)
+    for (final zone in grouped.keys) {
+      grouped[zone]!.sort((a, b) {
+        // Sort by pickup date (newest first)
+        return b.pickupDate.compareTo(a.pickupDate);
+      });
     }
     
-    return sortedMap;
+    // Sort zones by most recent pickup date in each zone
+    final sortedEntries = grouped.entries.toList()
+      ..sort((a, b) {
+        // Get the most recent pickup date from each zone
+        final aLatestDate = a.value.isNotEmpty 
+            ? a.value.map((p) => p.pickupDate).reduce((a, b) => a.isAfter(b) ? a : b)
+            : DateTime(1970);
+        final bLatestDate = b.value.isNotEmpty
+            ? b.value.map((p) => p.pickupDate).reduce((a, b) => a.isAfter(b) ? a : b)
+            : DateTime(1970);
+        
+        // Sort by most recent date (newest first)
+        return bLatestDate.compareTo(aLatestDate);
+      });
+    
+    return Map.fromEntries(sortedEntries);
   }
 
   /// Refresh pickups

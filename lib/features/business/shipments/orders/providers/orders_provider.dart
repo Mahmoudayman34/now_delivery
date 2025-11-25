@@ -50,14 +50,41 @@ class OrdersNotifier extends StateNotifier<AsyncValue<Map<String, List<Order>>>>
       grouped[zone]!.add(order);
     }
     
-    // Sort zones alphabetically
-    final sortedKeys = grouped.keys.toList()..sort();
-    final sortedMap = <String, List<Order>>{};
-    for (final key in sortedKeys) {
-      sortedMap[key] = grouped[key]!;
+    // Sort items within each zone: newest first, express first on same day
+    for (final zone in grouped.keys) {
+      grouped[zone]!.sort((a, b) {
+        // Check if both are from the same day
+        final aDate = DateTime(a.orderDate.year, a.orderDate.month, a.orderDate.day);
+        final bDate = DateTime(b.orderDate.year, b.orderDate.month, b.orderDate.day);
+        final sameDay = aDate == bDate;
+        
+        // If same day, express orders come first
+        if (sameDay) {
+          if (a.isExpressShipping && !b.isExpressShipping) return -1;
+          if (!a.isExpressShipping && b.isExpressShipping) return 1;
+        }
+        
+        // Sort by date (newest first)
+        return b.orderDate.compareTo(a.orderDate);
+      });
     }
     
-    return sortedMap;
+    // Sort zones by most recent order date in each zone
+    final sortedEntries = grouped.entries.toList()
+      ..sort((a, b) {
+        // Get the most recent order date from each zone
+        final aLatestDate = a.value.isNotEmpty 
+            ? a.value.map((o) => o.orderDate).reduce((a, b) => a.isAfter(b) ? a : b)
+            : DateTime(1970);
+        final bLatestDate = b.value.isNotEmpty
+            ? b.value.map((o) => o.orderDate).reduce((a, b) => a.isAfter(b) ? a : b)
+            : DateTime(1970);
+        
+        // Sort by most recent date (newest first)
+        return bLatestDate.compareTo(aLatestDate);
+      });
+    
+    return Map.fromEntries(sortedEntries);
   }
 
 

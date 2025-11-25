@@ -5,6 +5,7 @@ class Pickup {
   final String merchantName;
   final String merchantAddress;
   final String merchantCity;
+  final String merchantZone;
   final String merchantPhone;
   final PickupStatus status;
   final String statusCategory;
@@ -24,6 +25,7 @@ class Pickup {
     required this.merchantName,
     required this.merchantAddress,
     required this.merchantCity,
+    required this.merchantZone,
     required this.merchantPhone,
     required this.status,
     required this.statusCategory,
@@ -42,6 +44,34 @@ class Pickup {
     final business = json['business'] as Map<String, dynamic>? ?? {};
     final pickUpAddress = business['pickUpAdress'] as Map<String, dynamic>? ?? {};
     
+    // Get zone from pickUpAdress, or try to find it from pickUpAddresses array
+    String? zone = pickUpAddress['zone'] as String?;
+    if (zone == null || zone.isEmpty) {
+      // Try to find zone from pickUpAddresses array that matches pickupAddressId
+      final pickupAddressId = json['pickupAddressId'] as String?;
+      if (pickupAddressId != null) {
+        final pickUpAddresses = business['pickUpAddresses'] as List<dynamic>?;
+        if (pickUpAddresses != null) {
+          for (final address in pickUpAddresses) {
+            final addressMap = address as Map<String, dynamic>;
+            if (addressMap['addressId'] == pickupAddressId || 
+                addressMap['_id']?.toString() == pickupAddressId) {
+              zone = addressMap['zone'] as String?;
+              break;
+            }
+          }
+        }
+      }
+      // If still not found, try first address in pickUpAddresses
+      if (zone == null || zone.isEmpty) {
+        final pickUpAddresses = business['pickUpAddresses'] as List<dynamic>?;
+        if (pickUpAddresses != null && pickUpAddresses.isNotEmpty) {
+          final firstAddress = pickUpAddresses[0] as Map<String, dynamic>;
+          zone = firstAddress['zone'] as String?;
+        }
+      }
+    }
+    
     // Get pickupNumber with defensive fallback
     final pickupNumberFromApi = json['pickupNumber']?.toString() ?? '';
     final idValue = json['_id']?.toString() ?? '';
@@ -55,6 +85,7 @@ class Pickup {
       merchantName: business['brandInfo']?['brandName'] as String? ?? 'Unknown Merchant',
       merchantAddress: pickUpAddress['adressDetails'] as String? ?? 'Unknown Address',
       merchantCity: pickUpAddress['city'] as String? ?? 'Unknown City',
+      merchantZone: zone ?? pickUpAddress['city'] as String? ?? 'Unknown Zone',
       merchantPhone: pickUpAddress['pickupPhone'] as String? ?? json['phoneNumber'] as String? ?? 'N/A',
       status: PickupStatus.fromString(json['picikupStatus'] as String? ?? 'new'),
       statusCategory: json['statusCategory'] as String? ?? 'NEW',
@@ -95,6 +126,7 @@ class Pickup {
         'brandInfo': {'brandName': merchantName},
         'pickUpAdress': {
           'city': merchantCity,
+          'zone': merchantZone,
           'adressDetails': merchantAddress,
           'pickupPhone': merchantPhone,
           'nearbyLandmark': nearbyLandmark,

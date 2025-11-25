@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/error_message_parser.dart';
 import '../../../shared/widgets/custom_notifications.dart';
 import '../../main/widgets/main_layout.dart';
 import '../../../core/services/firebase_messaging_service.dart';
@@ -94,21 +95,34 @@ class AuthService {
         );
         return true;
       } else {
+        // Parse error message from API response
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Invalid credentials. Please try again.',
+        );
+        
         // Show error notification
         CustomNotification.showError(
           context,
           title: 'Login Failed',
-          message: data['message'] ?? 'Invalid credentials. Please try again.',
+          message: errorMessage,
         );
         return false;
       }
     } catch (e) {
       debugPrint('Login error: $e');
+      
+      // Parse error message from exception
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Something went wrong. Please check your internet connection.',
+      );
+      
       // Show error notification with retry option
       CustomNotification.showError(
         context,
         title: 'Connection Error',
-        message: 'Something went wrong. Please check your internet connection.',
+        message: errorMessage,
       );
       return false;
     }

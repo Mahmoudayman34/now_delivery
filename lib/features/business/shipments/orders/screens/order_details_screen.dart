@@ -25,7 +25,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   MobileScannerController? _scannerController;
-  final bool _isScanning = false;
   bool _isOrderScanned = false;
 
   @override
@@ -236,10 +235,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       width: double.infinity,
                       height: 54,
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: Implement call customer
-                          _showSnackBar(context, 'Calling ${order.customerName}...');
-                        },
+                        onPressed: () => _callCustomer(order),
                         icon: const Icon(Icons.phone, size: 20),
                         label: Text(
                           'Call Customer',
@@ -263,10 +259,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       width: double.infinity,
                       height: 54,
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          // TODO: Implement navigation
-                          _showSnackBar(context, 'Opening navigation to customer address...');
-                        },
+                        onPressed: () => _navigateToCustomer(order),
                         icon: const Icon(Icons.navigation_outlined, size: 20),
                         label: Text(
                           'Navigate to Address',
@@ -732,6 +725,32 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
+  void _callCustomer(Order order) async {
+    final phone = order.customerPhone;
+    if (phone.isEmpty || phone == 'N/A') {
+      _showSnackBar(context, 'Customer phone number not available');
+      return;
+    }
+    
+    // Remove any spaces or special characters except + and digits
+    final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    final phoneUrl = Uri.parse('tel:$cleanPhone');
+    
+    try {
+      if (await canLaunchUrl(phoneUrl)) {
+        await launchUrl(phoneUrl);
+      } else {
+        if (mounted) {
+          _showSnackBar(context, 'Could not open phone dialer');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(context, 'Error calling: $e');
+      }
+    }
+  }
+
   String _formatOrderDate(DateTime date) {
     return DateFormat('MMMM d, yyyy').format(date);
   }
@@ -1090,36 +1109,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 
                 SizedBox(height: spacing.md),
                 
-                // Order Number Display
-                Container(
-                  padding: EdgeInsets.all(spacing.md),
-                  decoration: BoxDecoration(
-                    color: AppTheme.lightGray,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppTheme.mediumGray.withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        order.orderNumber,
-                        style: GoogleFonts.inter(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.darkGray,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                SizedBox(height: spacing.md),
-                
-                // Scan Button or Success Message
+                // Success Message or Scan Button
                 if (_isOrderScanned)
                   Container(
                     padding: EdgeInsets.all(spacing.md),
@@ -1150,23 +1140,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 else
                   SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 54,
                     child: ElevatedButton.icon(
-                      onPressed: _isScanning ? null : () => _startScanning(order),
-                      icon: _isScanning
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.qr_code_scanner, size: 20),
+                      onPressed: () => _startScanning(order),
+                      icon: const Icon(Icons.qr_code_scanner, size: 24),
                       label: Text(
-                        _isScanning ? 'Processing...' : 'Scan & Process',
+                        'Open Scanner',
                         style: GoogleFonts.inter(
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1215,21 +1196,67 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
+  // Navigate to customer address
+  void _navigateToCustomer(Order order) async {
+    // Build address string from available fields
+    final addressParts = <String>[];
+    
+    if (order.customerAddress.isNotEmpty && order.customerAddress != 'Unknown Address') {
+      addressParts.add(order.customerAddress);
+    }
+    
+    if (order.zone.isNotEmpty && order.zone != 'Unknown Zone') {
+      addressParts.add(order.zone);
+    }
+    
+    // If we have address parts, use them for navigation
+    if (addressParts.isEmpty) {
+      _showSnackBar(context, 'Customer address not available');
+      return;
+    }
+    
+    final addressQuery = addressParts.join(', ');
+    
+    // Try Google Maps with address search
+    // First try with coordinates if available (from detailed order data)
+    // Otherwise use address string search
+    final googleMapsUrl = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(addressQuery)}'
+    );
+    
+    try {
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          _showSnackBar(context, 'Could not open maps application');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(context, 'Error opening maps: $e');
+      }
+    }
+  }
+
   // Start scanning for fast shipping order
   void _startScanning(Order order) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _FastShippingScanDialog(
-          order: order,
-          onScanSuccess: () {
-            setState(() {
-              _isOrderScanned = true;
-            });
-            _loadOrderDetails(); // Reload order details after successful scan
-          },
-        );
-      },
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (BuildContext context) {
+          return _FastShippingScanScreen(
+            order: order,
+            onScanSuccess: () {
+              setState(() {
+                _isOrderScanned = true;
+              });
+              _loadOrderDetails(); // Reload order details after successful scan
+              Navigator.of(context).pop(); // Close scanner screen
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -1647,21 +1674,21 @@ class _RejectDialogState extends State<_RejectDialog> {
   }
 }
 
-// Fast Shipping Scan Dialog
-class _FastShippingScanDialog extends StatefulWidget {
+// Fast Shipping Scan Full Screen
+class _FastShippingScanScreen extends StatefulWidget {
   final Order order;
   final VoidCallback onScanSuccess;
 
-  const _FastShippingScanDialog({
+  const _FastShippingScanScreen({
     required this.order,
     required this.onScanSuccess,
   });
 
   @override
-  State<_FastShippingScanDialog> createState() => _FastShippingScanDialogState();
+  State<_FastShippingScanScreen> createState() => _FastShippingScanScreenState();
 }
 
-class _FastShippingScanDialogState extends State<_FastShippingScanDialog> {
+class _FastShippingScanScreenState extends State<_FastShippingScanScreen> {
   MobileScannerController? _scannerController;
   bool _isProcessing = false;
   
@@ -1714,8 +1741,6 @@ class _FastShippingScanDialogState extends State<_FastShippingScanDialog> {
         final message = response['message'] as String? ?? 'Order scanned successfully';
         
         if (success) {
-          Navigator.of(context).pop(); // Close the scanner dialog
-          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),
@@ -1760,104 +1785,112 @@ class _FastShippingScanDialogState extends State<_FastShippingScanDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
-        height: 500,
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Scan Order Barcode',
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.darkGray,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Info
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.purple.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.purple, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Scan order #${widget.order.orderNumber} or Smart Flyer barcode',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.purple.shade900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Scanner
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: _isProcessing
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Processing...',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.darkGray,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : MobileScanner(
-                        controller: _scannerController,
-                        onDetect: (capture) {
-                          final List<Barcode> barcodes = capture.barcodes;
-                          for (final barcode in barcodes) {
-                            if (barcode.rawValue != null) {
-                              _handleBarcode(barcode.rawValue!);
-                              break;
-                            }
-                          }
-                        },
-                      ),
-              ),
-            ),
-          ],
+    final spacing = AppTheme.spacing(context);
+    
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text(
+          'Scan Order Barcode',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
+        backgroundColor: Colors.purple,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Stack(
+        children: [
+          // Full Screen Scanner
+          _isProcessing
+              ? Container(
+                  color: Colors.black,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Processing...',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : MobileScanner(
+                  controller: _scannerController,
+                  onDetect: (capture) {
+                    final List<Barcode> barcodes = capture.barcodes;
+                    for (final barcode in barcodes) {
+                      if (barcode.rawValue != null) {
+                        _handleBarcode(barcode.rawValue!);
+                        break;
+                      }
+                    }
+                  },
+                ),
+          
+          // Info Banner at Bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.all(spacing.md),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.8),
+                    Colors.black,
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: Container(
+                  padding: EdgeInsets.all(spacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.purple,
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.purple, size: 24),
+                      SizedBox(width: spacing.sm),
+                      Expanded(
+                        child: Text(
+                          'Scan order #${widget.order.orderNumber} or Smart Flyer barcode',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.purple.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

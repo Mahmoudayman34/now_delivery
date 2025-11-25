@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../../core/utils/error_message_parser.dart';
 import '../models/order.dart';
 
 class OrdersApiService {
@@ -42,11 +43,19 @@ class OrdersApiService {
         return data.map((json) => Order.fromJson(json as Map<String, dynamic>)).toList();
       } else {
         print('❌ Failed to fetch orders: ${response.statusCode}');
-        throw Exception('Failed to fetch orders: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch orders',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching orders: $e');
-      throw Exception('Error fetching orders: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch orders',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -71,11 +80,19 @@ class OrdersApiService {
         return Order.fromJson(data);
       } else {
         print('❌ Failed to fetch order: ${response.statusCode}');
-        throw Exception('Failed to fetch order: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch order',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching order: $e');
-      throw Exception('Error fetching order: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch order',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -97,6 +114,7 @@ class OrdersApiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final orderData = data['order'] as Map<String, dynamic>;
+        final selectedPickupAddress = data['selectedPickupAddress'] as Map<String, dynamic>?;
         
         // Log important status fields
         print('📊 Order Status Fields:');
@@ -104,16 +122,27 @@ class OrdersApiService {
         print('   - statusLabel: ${orderData['statusLabel']}');
         print('   - statusDescription: ${orderData['statusDescription']}');
         print('   - orderNumber: ${orderData['orderNumber']}');
+        if (selectedPickupAddress != null) {
+          print('   - selectedPickupAddressId: ${selectedPickupAddress['addressId']}');
+        }
         
         print('✅ Successfully fetched order details: $orderNumber');
-        return Order.fromJson(orderData);
+        return Order.fromJson(orderData, selectedPickupAddress: selectedPickupAddress);
       } else {
         print('❌ Failed to fetch order details: ${response.statusCode}');
-        throw Exception('Failed to fetch order details: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to fetch order details',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error fetching order details: $e');
-      throw Exception('Error fetching order details: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to fetch order details',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -152,11 +181,19 @@ class OrdersApiService {
         return;
       } else {
         print('❌ Failed to update order status: ${response.statusCode}');
-        throw Exception('Failed to update order status: ${response.statusCode} - ${response.body}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to update order status',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error updating order status: $e');
-      throw Exception('Error updating order status: $e');
+      final errorMessage = ErrorMessageParser.parseException(
+        e,
+        defaultMessage: 'Failed to update order status',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -208,36 +245,32 @@ class OrdersApiService {
       print('📥 Response Status: ${response.statusCode}');
       print('📦 Response Body: ${response.body}');
 
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final message = responseData['message'] as String? ?? 'Order completed successfully';
-        print('✅ Successfully completed order: $message');
-        return message;
-      } else {
-        // Parse error message from API response
-        final errorMessage = responseData['message'] as String? ?? 
-                            'Failed to complete order: ${response.statusCode}';
-        print('❌ Failed to complete order: ${response.statusCode} - $errorMessage');
-        
-        // Throw specific error based on status code
-        if (response.statusCode == 400) {
-          throw Exception(errorMessage);
-        } else if (response.statusCode == 401) {
-          throw Exception('Unauthorized: Please login again');
-        } else if (response.statusCode == 404) {
-          throw Exception(errorMessage);
-        } else {
-          throw Exception(errorMessage);
+        try {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final message = responseData['message'] as String? ?? 'Order completed successfully';
+          print('✅ Successfully completed order: $message');
+          return message;
+        } catch (e) {
+          print('⚠️ Error parsing success response: $e');
+          return 'Order completed successfully';
         }
+      } else {
+        print('❌ Failed to complete order: ${response.statusCode}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to complete order',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error completing order: $e');
-      // Re-throw if it's already an Exception with a message
-      if (e is Exception) {
-        rethrow;
-      }
-      throw Exception('Error completing order: $e');
+      final errorMessage = ErrorMessageParser.parse(
+        response: null,
+        error: e,
+        defaultMessage: 'Failed to complete order',
+      );
+      throw Exception(errorMessage);
     }
   }
 
@@ -265,35 +298,31 @@ class OrdersApiService {
       print('📥 Response Status: ${response.statusCode}');
       print('📦 Response Body: ${response.body}');
 
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ Successfully scanned fast shipping order: $orderNumber');
-        return responseData;
-      } else {
-        // Parse error message from API response
-        final errorMessage = responseData['message'] as String? ?? 
-                            'Failed to scan order: ${response.statusCode}';
-        print('❌ Failed to scan order: ${response.statusCode} - $errorMessage');
-        
-        // Throw specific error based on status code
-        if (response.statusCode == 400) {
-          throw Exception(errorMessage);
-        } else if (response.statusCode == 403) {
-          throw Exception(errorMessage);
-        } else if (response.statusCode == 404) {
-          throw Exception(errorMessage);
-        } else {
-          throw Exception(errorMessage);
+        try {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          print('✅ Successfully scanned fast shipping order: $orderNumber');
+          return responseData;
+        } catch (e) {
+          print('⚠️ Error parsing success response: $e');
+          throw Exception('Invalid response format from server');
         }
+      } else {
+        print('❌ Failed to scan order: ${response.statusCode}');
+        final errorMessage = ErrorMessageParser.parseHttpError(
+          response,
+          defaultMessage: 'Failed to scan order',
+        );
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print('💥 Error scanning order: $e');
-      // Re-throw if it's already an Exception with a message
-      if (e is Exception) {
-        rethrow;
-      }
-      throw Exception('Error scanning order: $e');
+      final errorMessage = ErrorMessageParser.parse(
+        response: null,
+        error: e,
+        defaultMessage: 'Failed to scan order',
+      );
+      throw Exception(errorMessage);
     }
   }
 }
